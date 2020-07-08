@@ -11,7 +11,7 @@ import java.util.concurrent.Executors
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class GNFinderClientTest {
     val dispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
-    val client = GNFinderClient("localhost:15601", dispatcher)
+    val client = GNFinderClient("gnfinder:8778", dispatcher)
 
     @Test
     fun ping() {

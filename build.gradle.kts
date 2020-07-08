@@ -16,7 +16,7 @@ val javaxAnnotationVersion = "1.3.2"
 // gnfinder
 val grpcVersion = "1.30.2"
 val grpcKotlinVersion = "0.1.4"
-val protobufVersion = "3.12.3"
+val protobufVersion = "3.12.2"
 val coroutinesVersion = "1.3.7"
 
 plugins {

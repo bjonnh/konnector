@@ -10,6 +10,15 @@ containers:
       - type: cache
         name: gradle-cache
         container: /home/container-user/.gradle
+    working_directory: /code
+    environment:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false
+    run_as_current_user:
+      enabled: true
+      home_directory: /home/container-user
+  gnfinder:
+    image: gnames/gnfinder
+
 tasks:
   build:
     description: Building the library
@@ -20,6 +29,8 @@ tasks:
   test:
     description: Running the unit tests
     group: Test Tasks
+    dependencies:
+      - gnfinder
     run:
       container: build-env
       command: ./gradlew test
