@@ -10,4 +10,4 @@ services:
     - ${PWD}:/code
     - ${PWD}/.cache:/root/.gradle
     working_dir: /code
-    command: ./gradlew -Dorg.gradle.daemon=false test
+    command: ./gradlew -Dorg.gradle.daemon=false -DgnfinderTest=true test

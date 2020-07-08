@@ -23,5 +23,16 @@ cache:
 before_install:
 - mkdir -p .cache
 
-script:
-- docker-compose up --abort-on-container-exit
+stages:
+  - name: test
+  - name: snapshot
+    if: branch = master
+  - name: release
+    if: branch = release
+
+jobs:
+  include:
+    - stage: test
+      script: docker-compose up --abort-on-container-exit
+    - stage: snapshot
+      script: docker run --rm -v $PWD:/code -e BINTRAY_KEY=${BINTRAY_KEY} -e BINTRAY_USER=${BINTRAY_USER} -v ${PWD}/.cache:/root/.gradle -w /code adoptopenjdk:11-jdk-hotspot ./gradlew -Dorg.gradle.daemon=false artifactoryPublish -x test -Dsnapshot=true -Dbuild.number=$TRAVIS_BUILD_NUMBER

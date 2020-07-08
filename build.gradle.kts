@@ -5,6 +5,7 @@ import com.google.protobuf.gradle.plugins
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 
+val publicationName = "maven"
 
 var serializationRuntimeVersion = "0.20.0-1.4-M3"
 val kotlinLoggingVersion = "1.8.0.1"
@@ -19,26 +20,39 @@ val grpcKotlinVersion = "0.1.4"
 val protobufVersion = "3.12.2"
 val coroutinesVersion = "1.3.7"
 
+// bintray/jfrog
+
 plugins {
     val kotlinVersion = "1.4-M3"
     val protobufVersion = "0.8.12"
     id("java")
+    id("maven-publish")
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version "1.4-M3"
     id("com.google.protobuf") version protobufVersion
     id("com.github.ben-manes.versions") version "0.28.0"
+    id("com.jfrog.bintray") version "1.8.5"
+    id("com.github.johnrengelman.shadow") version "2.0.2"
+    id("org.jetbrains.dokka") version "1.4.0-M3-dev-54"
+    id("fr.coppernic.versioning") version "3.1.2"
 }
 
 group = "net.prod"
-version = "0.1-SNAPSHOT"
+version = "0.1" + if (System.getProperty("snapshot")?.isEmpty() != false) { "" } else { "-SNAPSHOT" }
 
 repositories {
-    maven("https://dl.bintray.com/bjonnh/RDF4K")
     maven("https://dl.bintray.com/kotlin/kotlin-eap")
+    maven("https://dl.bintray.com/kotlin/kotlin-dev")
     maven("https://kotlin.bintray.com/kotlinx")
     maven("http://oss.jfrog.org/artifactory/oss-snapshot-local/")
-    maven("https://jcenter.bintray.com")
-    mavenCentral()
+    jcenter()
+}
+
+buildscript {
+    repositories {
+        maven("	https://dl.bintray.com/kotlin/kotlin-dev")
+        maven("https://dl.bintray.com/kotlin/kotlin-eap")
+    }
 }
 
 dependencies {
@@ -134,7 +148,43 @@ tasks {
     compileTestKotlin {
         kotlinOptions.jvmTarget = "11"
     }
+
+    dokka {
+        outputFormat = "html"
+        outputDirectory = "$buildDir/dokka"
+    }
+
+    withType<com.jfrog.bintray.gradle.tasks.BintrayUploadTask> {
+        dependsOn("build")
+    }
 }
+
+
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets["main"].allSource)
+}
+
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn("dokka")
+    archiveClassifier.set("javadoc")
+    from("$buildDir/dokka")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>(publicationName) {
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+
+            from(components["java"])
+            artifact(sourcesJar.get())
+            artifact(javadocJar.get())
+        }
+    }
+}
+
 
 /**
  * Configuration of test framework
@@ -145,4 +195,20 @@ tasks.test {
     testLogging {
         events("passed", "skipped", "failed")
     }
+}
+
+// For publishing
+
+bintray {
+    user = System.getenv("BINTRAY_USER") ?: System.getProperty("bintray.user")
+    key = System.getenv("BINTRAY_KEY") ?: System.getProperty("bintray.key")
+    dryRun = false
+    publish = true
+    setPublications(publicationName)
+    pkg(delegateClosureOf<com.jfrog.bintray.gradle.BintrayExtension.PackageConfig> {
+        repo = "Konnector"
+        name = "konnector"
+        setLicenses("MIT")
+        vcsUrl = "https://github.com/bjonnh/konnector"
+    })
 }
