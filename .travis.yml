@@ -1,0 +1,20 @@
+dist: bionic
+
+services:
+  - docker
+
+env:
+  - BATECT_CACHE_TYPE=directory
+
+script: ./travis/build.sh
+
+before_cache:
+  - rm -f  .batect/caches/gradle-cache/caches/modules-2/modules-2.lock
+  - rm -fr .batect/caches/gradle-cache/caches/*/plugin-resolution/
+  - rm -f  .batect/caches/gradle-cache/caches/*/fileHashes/fileHashes.bin
+  - rm -f  .batect/caches/gradle-cache/caches/*/fileHashes/fileHashes.lock
+  - rm -f  .batect/caches/gradle-cache/caches/*/javaCompile/javaCompile.lock
+
+cache:
+  directories:
+    - .batect/caches

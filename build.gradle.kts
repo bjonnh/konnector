@@ -6,26 +6,27 @@ import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 
 
-var serializationRuntimeVersion = "0.20.0-1.4-M2"
-val kotlinLoggingVersion = "1.7.6"
-var ktorVersion = "1.3.2-1.4-M2"
-val woodstoxVersion = "5.2.0"
+var serializationRuntimeVersion = "0.20.0-1.4-M3"
+val kotlinLoggingVersion = "1.8.0.1"
+var ktorVersion = "1.3.2-1.4-M3"
+val woodstoxVersion = "6.2.1"
 val moshiVersion = "1.9.3"
 val junitApiVersion = "5.6.0"
-
+val javaxAnnotationVersion = "1.3.2"
 // gnfinder
-val grpcVersion = "1.30.0"
+val grpcVersion = "1.30.2"
 val grpcKotlinVersion = "0.1.4"
-val protobufVersion = "3.12.2"
+val protobufVersion = "3.12.3"
 val coroutinesVersion = "1.3.7"
 
 plugins {
-    val kotlinVersion = "1.4-M2"
+    val kotlinVersion = "1.4-M3"
     val protobufVersion = "0.8.12"
     id("java")
     kotlin("jvm") version kotlinVersion
-    kotlin("plugin.serialization") version "1.4-M2"
+    kotlin("plugin.serialization") version "1.4-M3"
     id("com.google.protobuf") version protobufVersion
+    id("com.github.ben-manes.versions") version "0.28.0"
 }
 
 group = "net.prod"
@@ -66,7 +67,7 @@ dependencies {
         exclude("org.slf4j")
     }
 
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
+    implementation("javax.annotation:javax.annotation-api:$javaxAnnotationVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitApiVersion")

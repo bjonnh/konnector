@@ -1,0 +1,31 @@
+project_name: konnector
+
+containers:
+  build-env:
+    image: adoptopenjdk:11-jdk-hotspot
+    volumes:
+      - local: .
+        container: /code
+        options: cached
+      - type: cache
+        name: gradle-cache
+        container: /home/container-user/.gradle
+tasks:
+  build:
+    description: Building the library
+    group: Build tasks
+    run:
+      container: build-env
+      command: ./gradlew build
+  test:
+    description: Running the unit tests
+    group: Test Tasks
+    run:
+      container: build-env
+      command: ./gradlew test
+  outdated:
+    description: Check for outdated dependencies.
+    group: Utility tasks
+    run:
+      container: build-env
+      command: ./gradlew dependencyUpdates -Drevision=release
