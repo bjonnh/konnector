@@ -21,7 +21,7 @@ cache:
     - .cache
 
 before_install:
-- mkdir .cache
+- mkdir -p .cache
 
 script:
 - docker-compose up --abort-on-container-exit
