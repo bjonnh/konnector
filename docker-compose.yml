@@ -9,6 +9,5 @@ services:
     volumes:
     - .:/code
     - /cache:/root/.gradle
-    user: ${CURRENT_UIGID}
     working_dir: /code
     command: ./gradlew -Dorg.gradle.daemon=false test

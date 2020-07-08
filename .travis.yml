@@ -24,4 +24,4 @@ before_install:
 - mkdir /cache
 
 script:
-- CURRENT_UIGID=$(id -u):$(id -g) docker-compose up --abort-on-container-exit
+- docker-compose up --abort-on-container-exit
