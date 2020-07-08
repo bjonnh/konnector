@@ -1,0 +1,93 @@
+package net.nprod.connector.pubmed
+
+import kotlinx.serialization.UnstableDefault
+import net.nprod.connector.pubmed.models.Esearch
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
+
+@UnstableDefault
+internal class EntrezConnectorTest {
+    private val eFetchPubmedParser = EFetchPubmedParser()
+    private var eSearchConn: EntrezConnector = EntrezConnector(null, 1000)
+
+    @Test
+    fun `basic search`() {
+        val output = eSearchConn.esearch("Science[journal] AND curcumin")
+        assert(output.esearchresult.count >= 2)
+    }
+
+    @Test
+    fun `Limits of results`() {
+        val output = eSearchConn.esearch("curcumin", retmax = 2)
+        assert(output.citationsLeft ?: 0 > 0)
+    }
+
+    @Test
+    fun `Next page of results`() {
+        val output = eSearchConn.esearch("curcumin", retmax = 2)
+        val nextOutput = eSearchConn.esearchNext(output)
+        assert(nextOutput.citationsLeft ?: 0 > 0)
+    }
+
+    @Test
+    fun `Use history server`() {
+        val output = eSearchConn.esearch("curcumin", retmax = 2, usehistory = true)
+        assertNotNull(output.esearchresult.querykey)
+        assertNotNull(output.esearchresult.webenv)
+    }
+
+    @Test
+    fun `Append using history server`() {
+        val output = eSearchConn.esearch("curcumin", retmax = 2, usehistory = true)
+        val nextOutput = eSearchConn.esearchNext(output)
+        assertNotNull(output.esearchresult.querykey)
+        assertNotNull(output.esearchresult.webenv)
+    }
+
+    @Test
+    fun `basic search count`() {
+        val output = eSearchConn.esearch("Science[journal] AND curcumin", countonly = true)
+        assert(output.esearchresult.count >= 2)
+        assertNull(output.esearchresult.idlist)
+    }
+
+    @Test
+    fun `basic Efetch test`() {
+        val output = eSearchConn.efetch(listOf(17284678))
+        assert(output.result != "")
+    }
+
+    @Test
+    fun `Display the current time requested`() {
+        val output = eSearchConn.efetch(listOf(17284678))
+        println("Current delay is ${eSearchConn.delay}")
+        assert(output.result != "")
+    }
+
+    @Test
+    fun `Testing multi page requests`() {
+        val eSearch = Esearch.fromString(
+            eSearchConn.esearch(
+                "sitosterol curcumin"
+            ).asString()
+        )
+
+        val toUpdate = eSearchConn.getNewIDs(
+            (eSearch.esearchresult.webenv ?: ""),
+            (eSearch.esearchresult.querykey ?: 1),
+            retmax = 2
+        )
+    }
+
+    @Test
+    fun `Make sure articles with corrections match the correction id`() {
+        val output = eSearchConn.efetch(listOf(31444171))
+
+        val article = output.result
+        val pmid = eFetchPubmedParser.parsePubmedArticlesIn(
+            article.byteInputStream()
+        ).getOrNull(0)?.pmid?.toLong()
+
+        assertEquals(31444171, pmid)
+    }
+}
