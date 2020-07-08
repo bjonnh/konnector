@@ -1,0 +1,14 @@
+version: '2.0'
+services:
+  gnfinder:
+    image: gnames/gnfinder
+    ports:
+    - "8778:8778"
+  konnector:
+    image: adoptopenjdk:11-jdk-hotspot
+    volumes:
+    - .:/code
+    - /cache:/root/.gradle
+    user: ${CURRENT_UIGID}
+    working_dir: /code
+    command: ./gradlew -Dorg.gradle.daemon=false test
