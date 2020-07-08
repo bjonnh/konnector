@@ -18,10 +18,10 @@ services:
 
 cache:
   directories:
-    - /cache
+    - .cache
 
 before_install:
-- mkdir /cache
+- mkdir .cache
 
 script:
 - docker-compose up --abort-on-container-exit

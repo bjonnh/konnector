@@ -7,7 +7,7 @@ services:
   konnector:
     image: adoptopenjdk:11-jdk-hotspot
     volumes:
-    - .:/code
-    - /cache:/root/.gradle
+    - ${PWD}:/code
+    - ${PWD}/.cache:/root/.gradle
     working_dir: /code
     command: ./gradlew -Dorg.gradle.daemon=false test
