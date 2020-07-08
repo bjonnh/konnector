@@ -9,4 +9,3 @@ echo
 echo "Running unit tests..."
 ./batect test
 echo
-

@@ -18,6 +18,8 @@ containers:
       home_directory: /home/container-user
   gnfinder:
     image: gnames/gnfinder
+    additional_hostnames:
+      - gnfinder
 
 tasks:
   build:
