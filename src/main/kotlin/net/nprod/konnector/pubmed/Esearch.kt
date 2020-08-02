@@ -1,13 +1,12 @@
-package net.nprod.connector.pubmed
+package net.nprod.konnector.pubmed
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
-import net.nprod.connector.commons.BadRequestError
 
-import net.nprod.connector.pubmed.models.Esearch
+import net.nprod.konnector.pubmed.models.Esearch
 
 /**
  * Runs a query on Esearch

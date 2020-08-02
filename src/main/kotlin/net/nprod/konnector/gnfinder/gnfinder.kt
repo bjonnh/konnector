@@ -1,7 +1,6 @@
-package net.nprod.connector.gnfinder
+package net.nprod.konnector.gnfinder
 
 import com.google.protobuf.util.JsonFormat
-import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.asExecutor
@@ -9,7 +8,6 @@ import kotlinx.coroutines.runBlocking
 import protob.GNFinderGrpcKt
 import protob.Gnfinder
 import java.io.Closeable
-import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 
 fun voidRequest(): Gnfinder.Void = Gnfinder.Void.newBuilder().build()

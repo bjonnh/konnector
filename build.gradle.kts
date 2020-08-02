@@ -6,10 +6,12 @@ import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
 
 val publicationName = "maven"
+group = "net.nprod"
+version = "0.1.2" + if (System.getProperty("snapshot")?.isEmpty() != false) { "" } else { "-SNAPSHOT" }
 
-var serializationRuntimeVersion = "0.20.0-1.4-M3"
+var serializationRuntimeVersion = "0.20.0"
 val kotlinLoggingVersion = "1.8.0.1"
-var ktorVersion = "1.3.2-1.4-M3"
+var ktorVersion = "1.3.2"
 val woodstoxVersion = "6.2.1"
 val moshiVersion = "1.9.3"
 val junitApiVersion = "5.6.0"
@@ -23,22 +25,19 @@ val coroutinesVersion = "1.3.7"
 // bintray/jfrog
 
 plugins {
-    val kotlinVersion = "1.4-M3"
+    val kotlinVersion = "1.3.72"
     val protobufVersion = "0.8.12"
     id("java")
     id("maven-publish")
     kotlin("jvm") version kotlinVersion
-    kotlin("plugin.serialization") version "1.4-M3"
+    kotlin("plugin.serialization") version kotlinVersion
     id("com.google.protobuf") version protobufVersion
     id("com.github.ben-manes.versions") version "0.28.0"
     id("com.jfrog.bintray") version "1.8.5"
     id("com.github.johnrengelman.shadow") version "2.0.2"
-    id("org.jetbrains.dokka") version "1.4.0-M3-dev-54"
+    id("org.jetbrains.dokka") version "0.11.0-dev-47"
     id("fr.coppernic.versioning") version "3.1.2"
 }
-
-group = "net.prod"
-version = "0.1" + if (System.getProperty("snapshot")?.isEmpty() != false) { "" } else { "-SNAPSHOT" }
 
 repositories {
     maven("https://dl.bintray.com/kotlin/kotlin-eap")
@@ -110,15 +109,6 @@ protobuf {
                 id("grpckt")
             }
         }
-    }
-}
-
-// This is to have protobuf able to find the modules
-// Source: https://github.com/google/protobuf-gradle-plugin/issues/391#issuecomment-609958243
-
-configurations.forEach {
-    if (it.name.toLowerCase().contains("proto")) {
-        it.attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "java-runtime"))
     }
 }
 

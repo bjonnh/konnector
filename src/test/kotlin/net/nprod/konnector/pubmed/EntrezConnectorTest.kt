@@ -1,7 +1,7 @@
-package net.nprod.connector.pubmed
+package net.nprod.konnector.pubmed
 
 import kotlinx.serialization.UnstableDefault
-import net.nprod.connector.pubmed.models.Esearch
+import net.nprod.konnector.pubmed.models.Esearch
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

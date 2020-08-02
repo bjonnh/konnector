@@ -1,8 +1,7 @@
-package net.nprod.connector.pubmed
+package net.nprod.konnector.pubmed
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import net.nprod.connector.commons.BadRequestError
 
 
 data class EFetch(

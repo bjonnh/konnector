@@ -1,4 +1,4 @@
-package net.nprod.connector.gnfinder
+package net.nprod.konnector.gnfinder
 
 import kotlinx.coroutines.asCoroutineDispatcher
 import org.junit.jupiter.api.AfterAll

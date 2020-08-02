@@ -1,10 +1,9 @@
-package net.nprod.connector.crossref
+package net.nprod.konnector.crossref
 
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.response
 import io.ktor.util.KtorExperimentalAPI
 import org.slf4j.LoggerFactory
 

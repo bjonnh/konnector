@@ -1,13 +1,10 @@
-package net.nprod.connector.pubmed
+package net.nprod.konnector.pubmed
 
 import com.ctc.wstx.stax.WstxInputFactory
-import net.nprod.connector.commons.*
-import net.nprod.connector.pubmed.models.PubmedArticle
+import net.nprod.konnector.commons.*
+import net.nprod.konnector.pubmed.models.PubmedArticle
 import org.codehaus.stax2.XMLInputFactory2
-import java.io.ByteArrayInputStream
-import java.io.File
 import java.io.InputStream
-import java.util.stream.Stream
 
 import javax.xml.stream.XMLInputFactory
 

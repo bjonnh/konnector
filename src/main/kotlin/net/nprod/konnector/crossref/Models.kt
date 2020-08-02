@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package net.nprod.connector.crossref
+package net.nprod.konnector.crossref
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass

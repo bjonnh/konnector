@@ -1,4 +1,4 @@
-package net.nprod.connector.commons
+package net.nprod.konnector.commons
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

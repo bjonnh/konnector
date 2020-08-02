@@ -1,10 +1,10 @@
-package net.nprod.connector.crossref
+package net.nprod.konnector.crossref
 
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.ktor.util.KtorExperimentalAPI
-import net.nprod.connector.commons.DecodingError
+import net.nprod.konnector.commons.DecodingError
 
 
 @KtorExperimentalAPI

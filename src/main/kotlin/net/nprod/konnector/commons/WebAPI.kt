@@ -1,4 +1,4 @@
-package net.nprod.connector.commons
+package net.nprod.konnector.commons
 
 /*import arrow.fx.IO
 import arrow.fx.IO.Companion.effect
@@ -15,7 +15,6 @@ import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
-import java.util.concurrent.TimeoutException
 
 
 @KtorExperimentalAPI

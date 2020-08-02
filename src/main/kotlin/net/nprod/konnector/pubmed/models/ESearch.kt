@@ -1,6 +1,6 @@
 @file:Suppress("unused", "SpellCheckingInspection")
 
-package net.nprod.connector.pubmed.models
+package net.nprod.konnector.pubmed.models
 
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json

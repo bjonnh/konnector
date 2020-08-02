@@ -1,4 +1,4 @@
-package net.nprod.connector.crossref
+package net.nprod.konnector.crossref
 
 import io.ktor.util.KtorExperimentalAPI
 import org.junit.jupiter.api.Test

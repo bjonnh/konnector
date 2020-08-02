@@ -1,11 +1,10 @@
-package net.nprod.connector.pubmed
+package net.nprod.konnector.pubmed
 
 import io.ktor.client.statement.HttpResponse
 import io.ktor.util.KtorExperimentalAPI
-import mu.KotlinLogging
-import net.nprod.connector.commons.BadRequestError
-import net.nprod.connector.commons.WebAPI
-import net.nprod.connector.pubmed.models.Esearch
+import net.nprod.konnector.commons.BadRequestError
+import net.nprod.konnector.commons.WebAPI
+import net.nprod.konnector.pubmed.models.Esearch
 import org.slf4j.LoggerFactory
 
 /**
