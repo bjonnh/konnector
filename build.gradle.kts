@@ -7,7 +7,7 @@ import com.google.protobuf.gradle.protoc
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.2" + if (System.getProperty("snapshot")?.isEmpty() != false) { "" } else { "-SNAPSHOT" }
+version = "0.1.3" + if (System.getProperty("snapshot")?.isEmpty() != false) { "" } else { "-SNAPSHOT" }
 
 var serializationRuntimeVersion = "0.20.0"
 val kotlinLoggingVersion = "1.8.0.1"
