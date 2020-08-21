@@ -7,7 +7,6 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import protob.GNFinderGrpcKt
 import protob.Gnfinder
 import java.io.Closeable
@@ -79,15 +78,13 @@ class GNFinderClient(val target: String, private val dispatcher: ExecutorCorouti
         sources: Iterable<Int> = listOf(),
         verification: Boolean = false
     ): GNFinderResponse {
-        val json = Json(
-            JsonConfiguration(
-                ignoreUnknownKeys = true,
-                isLenient = true
-            )
-        )
-        return json.parse(
+        val json = Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+        }
+        return json.decodeFromString(
             GNFinderResponse.serializer(),
-            string = findNames(query, language, sources, verification)
+            findNames(query, language, sources, verification)
         )
     }
 

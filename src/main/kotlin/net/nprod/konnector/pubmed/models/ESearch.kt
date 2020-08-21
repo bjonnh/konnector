@@ -62,8 +62,7 @@ data class Esearch(
     /**
      * Get this object as a JSON string
      */
-    @UnstableDefault
-    fun asString(): String = Json.stringify(serializer(),this)
+    fun asString(): String = Json.encodeToString(serializer(),this)
 
     /**
      * Reduce the size of the object, mainly used to continue queries and fetch the next entries
@@ -96,8 +95,7 @@ data class Esearch(
      * Build an object from a JSON string
      */
     companion object {
-        @OptIn(UnstableDefault::class)
-        fun fromString(str: String): Esearch = try { Json.parse(serializer(), str) }
+        fun fromString(str: String): Esearch = try { Json.decodeFromString(serializer(), str) }
         catch (e: SerializationException) {
             throw ParsingError("Invalid JSON $e")
         }

@@ -1,17 +1,16 @@
-import com.google.protobuf.gradle.generateProtoTasks
-import com.google.protobuf.gradle.id
-import com.google.protobuf.gradle.ofSourceSet
-import com.google.protobuf.gradle.plugins
-import com.google.protobuf.gradle.protobuf
-import com.google.protobuf.gradle.protoc
+import com.google.protobuf.gradle.*
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.3" + if (System.getProperty("snapshot")?.isEmpty() != false) { "" } else { "-SNAPSHOT" }
+version = "0.1.4" + if (System.getProperty("snapshot")?.isEmpty() != false) {
+    ""
+} else {
+    "-SNAPSHOT"
+}
 
-var serializationRuntimeVersion = "0.20.0"
+var serializationRuntimeVersion = "1.0.0-RC"
 val kotlinLoggingVersion = "1.8.0.1"
-var ktorVersion = "1.3.2"
+var ktorVersion = "1.4.0"
 val woodstoxVersion = "6.2.1"
 val moshiVersion = "1.9.3"
 val junitApiVersion = "5.6.0"
@@ -20,12 +19,12 @@ val javaxAnnotationVersion = "1.3.2"
 val grpcVersion = "1.30.2"
 val grpcKotlinVersion = "0.1.4"
 val protobufVersion = "3.12.2"
-val coroutinesVersion = "1.3.7"
+val coroutinesVersion = "1.4.0"
 
 // bintray/jfrog
 
 plugins {
-    val kotlinVersion = "1.3.72"
+    val kotlinVersion = "1.4.0"
     val protobufVersion = "0.8.12"
     id("java")
     id("maven-publish")
@@ -35,29 +34,23 @@ plugins {
     id("com.github.ben-manes.versions") version "0.28.0"
     id("com.jfrog.bintray") version "1.8.5"
     id("com.github.johnrengelman.shadow") version "2.0.2"
-    id("org.jetbrains.dokka") version "0.11.0-dev-47"
+    id("org.jetbrains.dokka") version "1.4.0-rc"
     id("fr.coppernic.versioning") version "3.1.2"
 }
 
 repositories {
-    maven("https://dl.bintray.com/kotlin/kotlin-eap")
-    maven("https://dl.bintray.com/kotlin/kotlin-dev")
+    mavenCentral()
+
     maven("https://kotlin.bintray.com/kotlinx")
     maven("http://oss.jfrog.org/artifactory/oss-snapshot-local/")
     jcenter()
 }
 
-buildscript {
-    repositories {
-        maven("	https://dl.bintray.com/kotlin/kotlin-dev")
-        maven("https://dl.bintray.com/kotlin/kotlin-eap")
-    }
-}
 
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serializationRuntimeVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntimeVersion") // JVM dependency
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion") {
         exclude("org.slf4j")
@@ -139,9 +132,8 @@ tasks {
         kotlinOptions.jvmTarget = "11"
     }
 
-    dokka {
-        outputFormat = "html"
-        outputDirectory = "$buildDir/dokka"
+    dokkaHtml.configure {
+        outputDirectory = buildDir.resolve("dokka").path
     }
 
     withType<com.jfrog.bintray.gradle.tasks.BintrayUploadTask> {
@@ -155,11 +147,11 @@ val sourcesJar by tasks.registering(Jar::class) {
     from(sourceSets["main"].allSource)
 }
 
-val javadocJar by tasks.registering(Jar::class) {
-    dependsOn("dokka")
+/*val javadocJar by tasks.registering(Jar::class) {
+    dependsOn("dokkaH")
     archiveClassifier.set("javadoc")
     from("$buildDir/dokka")
-}
+}*/
 
 publishing {
     publications {
@@ -170,7 +162,7 @@ publishing {
 
             from(components["java"])
             artifact(sourcesJar.get())
-            artifact(javadocJar.get())
+            //artifact(javadocJar.get())
         }
     }
 }

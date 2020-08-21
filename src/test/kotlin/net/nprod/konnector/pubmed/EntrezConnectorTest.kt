@@ -1,11 +1,9 @@
 package net.nprod.konnector.pubmed
 
-import kotlinx.serialization.UnstableDefault
 import net.nprod.konnector.pubmed.models.Esearch
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
-@UnstableDefault
 internal class EntrezConnectorTest {
     private val eFetchPubmedParser = EFetchPubmedParser()
     private var eSearchConn: EntrezConnector = EntrezConnector(null, 1000)

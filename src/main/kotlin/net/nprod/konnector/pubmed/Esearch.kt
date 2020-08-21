@@ -2,7 +2,6 @@ package net.nprod.konnector.pubmed
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
@@ -20,7 +19,6 @@ import net.nprod.konnector.pubmed.models.Esearch
  * @param countonly This query is only for counting (useful to send to other services through the webenv)
  */
 
-@UnstableDefault
 fun EntrezConnector.esearch(
     query: String, retmax: Int? = null, retstart: Int? = null, usehistory: Boolean = false,
     webenv: String? = null, querykey: Int? = null, countonly: Boolean = false
@@ -60,14 +58,12 @@ fun EntrezConnector.esearch(
 
     runBlocking { delay(calcDelay()) }
 
-    val esearchResult = Json(
-        JsonConfiguration(
-            isLenient = true,
-            ignoreUnknownKeys = true,
-            serializeSpecialFloatingPointValues = true,
-            useArrayPolymorphism = true
-        )
-    ).parse(Esearch.serializer(), call)
+    val esearchResult = Json {
+        isLenient = true
+        ignoreUnknownKeys = true
+        allowSpecialFloatingPointValues = true
+        useArrayPolymorphism = true
+    }.decodeFromString(Esearch.serializer(), call)
 
     esearchResult.query = query
 

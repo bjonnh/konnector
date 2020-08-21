@@ -12,6 +12,5 @@ data class PubmedArticle(
     var year: String? = null,
     var DOI: String? = null
 ) {
-    @UnstableDefault
-    fun asString(): String = Json.stringify(serializer(),this)
+    fun asString(): String = Json.encodeToString(serializer(),this)
 }
