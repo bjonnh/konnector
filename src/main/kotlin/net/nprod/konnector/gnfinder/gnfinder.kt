@@ -27,6 +27,13 @@ data class GNFinderVerification(
 @Serializable
 data class GNFinderNames(
     val name: String,
+    val cardinality: Int?,
+    val verbatim: String?,
+    val odds: Double?,
+    val start: Int?,
+    val end: Int?,
+    val annotationNomenType: String?,
+    val annotation: String?,
     val verification: GNFinderVerification? = null
 )
 
