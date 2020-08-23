@@ -2,7 +2,7 @@ import com.google.protobuf.gradle.*
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.4" + if (System.getProperty("snapshot")?.isEmpty() != false) {
+version = "0.1.5" + if (System.getProperty("snapshot")?.isEmpty() != false) {
     ""
 } else {
     "-SNAPSHOT"
@@ -65,6 +65,8 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:$moshiVersion")
 
     // Protobuf and grpc for gnfinder
+    // We need this one as API because the client needs it
+    api("com.google.guava:guava:29.0-android")
     implementation("com.google.protobuf:protobuf-java-util:$protobufVersion")
     implementation("io.grpc:grpc-protobuf:$grpcVersion")
     implementation("io.grpc:grpc-stub:$grpcVersion")
