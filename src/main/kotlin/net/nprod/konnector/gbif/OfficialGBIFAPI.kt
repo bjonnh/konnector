@@ -1,4 +1,4 @@
-package net.nprod.konnector.crossref
+package net.nprod.konnector.gbif
 
 
 import io.ktor.client.HttpClient
@@ -9,12 +9,12 @@ import mu.KotlinLogging
 import org.slf4j.LoggerFactory
 
 
-class OfficialCrossRefAPI : CrossRefAPI {
+class OfficialGBIFAPI : GBIFAPI {
     override val log = KotlinLogging.logger(this::class.java.name)
-    override var httpClient = newClient("net.nprod.connector.crossref")
+    override var httpClient = newClient("net.nprod.konnector.gbif")
     override var delayTime = 20L  // Delay in ms between each request
     override var lastQueryTime: Long = System.currentTimeMillis()
-    override var apiURL = "https://api.crossref.org"
+    override var apiURL = "https://api.gbif.org/v1/"
 
     /**
      * Updates the necessary delay from the HTTP headers received
@@ -62,4 +62,3 @@ class OfficialCrossRefAPI : CrossRefAPI {
         }
     }
 }
-

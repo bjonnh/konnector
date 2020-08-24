@@ -2,6 +2,7 @@ package net.nprod.konnector.pubmed
 
 import io.ktor.client.statement.HttpResponse
 import io.ktor.util.KtorExperimentalAPI
+import mu.KotlinLogging
 import net.nprod.konnector.commons.BadRequestError
 import net.nprod.konnector.commons.WebAPI
 import net.nprod.konnector.pubmed.models.Esearch
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
 class EntrezConnector(private val apikey: String? = null, val delay: Long? = null) : WebAPI {
-    override val log = LoggerFactory.getLogger(this::class.java)
+    override val log = KotlinLogging.logger(this::class.java.name)
     override var httpClient = newClient("net.nprod.connector.pubmed")
     override var delayTime = delay ?: if (apikey == null) 334L else 101L  // Delay in ms between each request
     override var lastQueryTime: Long = System.currentTimeMillis()

@@ -1,9 +1,5 @@
 package net.nprod.konnector.commons
 
-/*import arrow.fx.IO
-import arrow.fx.IO.Companion.effect
-import arrow.fx.IO.Companion.raiseError
-import arrow.fx.extensions.fx*/
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.parameter
@@ -14,12 +10,14 @@ import io.ktor.http.HttpMethod
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import mu.KLogger
+import mu.KotlinLogging
 import org.slf4j.Logger
 
 
 @KtorExperimentalAPI
 interface WebAPI {
-    val log: Logger
+    val log: KLogger
 
     var delayTime: Long  // Delay in ms between each request
     var lastQueryTime: Long

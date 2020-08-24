@@ -2,7 +2,7 @@ import com.google.protobuf.gradle.*
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.5" + if (System.getProperty("snapshot")?.isEmpty() != false) {
+version = "0.1.6" + if (System.getProperty("snapshot")?.isEmpty() != false) {
     ""
 } else {
     "-SNAPSHOT"
@@ -55,6 +55,8 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion") {
         exclude("org.slf4j")
     }
+
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
 
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
 

@@ -27,13 +27,13 @@ data class GNFinderVerification(
 @Serializable
 data class GNFinderNames(
     val name: String,
-    val cardinality: Int?,
-    val verbatim: String?,
-    val odds: Double?,
-    val start: Int?,
-    val end: Int?,
-    val annotationNomenType: String?,
-    val annotation: String?,
+    val cardinality: Int? = null,
+    val verbatim: String? = null,
+    val odds: Double? = null,
+    val offsetStart: Int? = null,
+    val offsetEnd: Int? = null,
+    val annotationNomenType: String? = null,
+    val annotation: String? = null,
     val verification: GNFinderVerification? = null
 )
 
@@ -89,6 +89,7 @@ class GNFinderClient(val target: String, private val dispatcher: ExecutorCorouti
             ignoreUnknownKeys = true
             isLenient = true
         }
+
         return json.decodeFromString(
             GNFinderResponse.serializer(),
             findNames(query, language, sources, verification)

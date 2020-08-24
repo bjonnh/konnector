@@ -9,10 +9,10 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty
 import java.util.concurrent.Executors
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@EnabledIfSystemProperty(named = "gnfinderTest", matches = "true")
+//@EnabledIfSystemProperty(named = "gnfinderTest", matches = "true")
 internal class GNFinderClientTest {
     val dispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
-    val client = GNFinderClient("gnfinder:8778", dispatcher)
+    val client = GNFinderClient("localhost:8778", dispatcher)
 
     @Test
     fun ping() {
@@ -27,6 +27,14 @@ internal class GNFinderClientTest {
     @Test
     fun findNames() {
         assert("Curcuma longa" in client.findNames("The source of the compound, Curcuma longa, is a plant."))
+    }
+
+    @Test
+    fun findPositions() {
+        val text = "The source of the compound, Curcuma longa, is a plant."
+        val species = "Curcuma longa"
+        val output = client.findNamesToStructured(text, verification = false)
+        assert(output.names?.first()?.offsetStart == text.indexOf(species))
     }
 
     @Test
