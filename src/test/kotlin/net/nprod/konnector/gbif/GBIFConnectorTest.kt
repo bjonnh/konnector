@@ -12,7 +12,13 @@ internal class GBIFConnectorTest {
     fun `taxon occurrence search`() {
         val output = connector.occurenceOfTaxon("1",
         offset=42)
-        println(output)
         assertEquals(42, output.offset)
+    }
+
+    @Test
+    fun `taxon key search`() {
+        val output = connector.taxonkeyByName("Curcuma")
+        println(output)
+        assertEquals(2757518, output.genusKey)
     }
 }

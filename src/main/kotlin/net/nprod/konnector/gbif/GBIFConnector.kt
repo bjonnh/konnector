@@ -14,11 +14,37 @@ data class Occurence(
 
 @Serializable
 data class OccurenceSearchResponse (
-    val offset: Int,
-    val limit: Int,
+    val offset: Int?=null,
+    val limit: Int?=null,
     val endOfRecords: Boolean,
-    val count: Long,
+    val count: Long?=null,
     val results: List<Occurence>
+)
+
+@Serializable
+data class TaxonSearchResponse(
+    val usageKey: Int? = null,
+    val scientificName: String?=null,
+    val canonicalName: String?=null,
+    val rank: String?=null,
+    val status: String?=null,
+    val confidence: Int?=null,
+    val matchType: String?=null,
+    val kinkdom: String? = null,
+    val phylum: String? = null,
+    val order: String? = null,
+    val family: String? = null,
+    val genus: String? = null,
+    val species: String? = null,
+    val kingdomKey: Int? = null,
+    val phylumKey: Int? = null,
+    val classKey: Int? = null,
+    val orderKey: Int? = null,
+    val familyKey: Int? = null,
+    val genusKey: Int? = null,
+    val speciesKey: Int? = null,
+    val synonym: Boolean?=null,
+    val `class`: String? = null
 )
 
 @KtorExperimentalAPI
@@ -28,17 +54,36 @@ class GBIFConnector(private val API: GBIFAPI) {
         isLenient = true
     }
 
-    fun occurenceOfTaxon(taxonKey: String,
+    fun taxonkeyByName(name: String): TaxonSearchResponse {
+        val output = API.call(
+            API.apiURL + "species/match",
+            mutableMapOf("name" to name)
+        )
+
+        return json.decodeFromString(
+            TaxonSearchResponse.serializer(),
+            output
+        )
+    }
+
+    fun occurenceOfTaxon(q: String? = null, taxonKey: String? = null,
     limit: Int = 20, offset: Int = 0,
     basisOfRecord: String? = null): OccurenceSearchResponse {
         val parameters = mutableMapOf(
-            "taxonKey" to taxonKey,
             "limit" to "$limit",
             "offset" to "$offset"
         )
 
+        taxonKey?.let {
+            parameters["taxonKey"] = it
+        }
+
         basisOfRecord?.let {
             parameters["basisOfRecord"] = it
+        }
+
+        q?.let {
+            parameters["q"] = it
         }
 
         val output = API.call(
