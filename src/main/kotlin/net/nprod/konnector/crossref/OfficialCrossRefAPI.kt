@@ -9,7 +9,10 @@ import mu.KotlinLogging
 import org.slf4j.LoggerFactory
 
 
-class OfficialCrossRefAPI : CrossRefAPI {
+class OfficialCrossRefAPI(
+        private val networkKeepAliveTime: Long = 10000,
+        private val networkConnectTimeout: Long = 20000
+) : CrossRefAPI {
     override val log = KotlinLogging.logger(this::class.java.name)
     override var httpClient = newClient("net.nprod.connector.crossref")
     override var delayTime = 20L  // Delay in ms between each request
@@ -36,8 +39,8 @@ class OfficialCrossRefAPI : CrossRefAPI {
     override fun delayUpdate(call: HttpResponse) {
 
         updateDelayFromHeaderData(
-            call.headers["X-Rate-Limit-Limit"],
-            call.headers["X-Rate-Limit-Interval"]
+                call.headers["X-Rate-Limit-Limit"],
+                call.headers["X-Rate-Limit-Interval"]
         )
         updateLastQueryTime()
     }
@@ -49,13 +52,13 @@ class OfficialCrossRefAPI : CrossRefAPI {
             threadsCount = 4
 
             with(endpoint) {
-                maxConnectionsPerRoute = 100
+                maxConnectionsPerRoute = 10
 
                 pipelineMaxSize = 20
 
-                keepAliveTime = 5000
+                endpoint.keepAliveTime = networkKeepAliveTime
 
-                connectTimeout = 5000
+                connectTimeout = networkConnectTimeout
 
                 connectRetryAttempts = 5
             }
