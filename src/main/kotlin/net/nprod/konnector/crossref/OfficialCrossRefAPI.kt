@@ -11,7 +11,8 @@ import org.slf4j.LoggerFactory
 
 class OfficialCrossRefAPI(
         private val networkKeepAliveTime: Long = 10000,
-        private val networkConnectTimeout: Long = 20000
+        private val networkConnectTimeout: Long = 20000,
+        private val networkRequestTimeout: Long = 20000
 ) : CrossRefAPI {
     override val log = KotlinLogging.logger(this::class.java.name)
     override var httpClient = newClient("net.nprod.connector.crossref")
@@ -56,7 +57,9 @@ class OfficialCrossRefAPI(
 
                 pipelineMaxSize = 20
 
-                endpoint.keepAliveTime = networkKeepAliveTime
+                requestTimeout = networkRequestTimeout
+
+                keepAliveTime = networkKeepAliveTime
 
                 connectTimeout = networkConnectTimeout
 
