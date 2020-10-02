@@ -10,7 +10,10 @@ data class PubmedArticle(
     var abstract: String? = null,
     var articleTitle: String? = null,
     var year: String? = null,
-    var DOI: String? = null
+    var DOI: String? = null,
+    var volume: String? = null,
+    var issue: String? = null
 ) {
+    @Suppress("unused")
     fun asString(): String = Json.encodeToString(serializer(),this)
 }

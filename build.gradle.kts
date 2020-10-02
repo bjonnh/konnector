@@ -2,19 +2,19 @@ import com.google.protobuf.gradle.*
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.13" + if (System.getProperty("snapshot")?.isEmpty() != false) {
+version = "0.1.15" + if (System.getProperty("snapshot")?.isEmpty() != false) {
     ""
 } else {
     "-SNAPSHOT"
 }
 
-var serializationRuntimeVersion = "1.0.0-RC"
+var serializationRuntimeVersion = "1.0.0-RC2"
 val kotlinLoggingVersion = "1.8.0.1"
 var ktorVersion = "1.4.0"
 val woodstoxVersion = "6.2.1"
-val moshiVersion = "1.9.3"
 val junitApiVersion = "5.6.0"
 val javaxAnnotationVersion = "1.3.2"
+val slf4jVersion = "2.11.2"
 // gnfinder
 val grpcVersion = "1.30.2"
 val grpcKotlinVersion = "0.1.4"
@@ -24,7 +24,7 @@ val coroutinesVersion = "1.4.0"
 // bintray/jfrog
 
 plugins {
-    val kotlinVersion = "1.4.0"
+    val kotlinVersion = "1.4.10"
     val protobufVersion = "0.8.12"
     id("java")
     id("maven-publish")
@@ -50,21 +50,17 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$serializationRuntimeVersion") // JVM dependency
+    implementation("org.jetbrains.kotlinx","kotlinx-serialization-json", serializationRuntimeVersion)
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion") {
         exclude("org.slf4j")
     }
 
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$slf4jVersion")
 
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
 
     implementation("com.fasterxml.woodstox:woodstox-core:$woodstoxVersion")
-
-    // For net.nprod.connector.crossref
-    implementation("com.squareup.moshi:moshi:$moshiVersion")
-    implementation("com.squareup.moshi:moshi-kotlin:$moshiVersion")
 
     // Protobuf and grpc for gnfinder
     // We need this one as API because the client needs it

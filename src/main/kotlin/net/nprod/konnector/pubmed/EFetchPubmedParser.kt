@@ -1,6 +1,7 @@
 package net.nprod.konnector.pubmed
 
 import com.ctc.wstx.stax.WstxInputFactory
+import io.ktor.util.*
 import net.nprod.konnector.commons.*
 import net.nprod.konnector.pubmed.models.PubmedArticle
 import org.codehaus.stax2.XMLInputFactory2
@@ -11,8 +12,9 @@ import javax.xml.stream.XMLInputFactory
 /**
  * Parse a EFetch XML publication list and create simpler PubmedArticle objects.
  */
+@KtorExperimentalAPI
 class EFetchPubmedParser {
-    val factory: XMLInputFactory2
+    private val factory: XMLInputFactory2
 
     init {
         factory = WstxInputFactory()
@@ -21,6 +23,7 @@ class EFetchPubmedParser {
         factory.setProperty(XMLInputFactory.IS_VALIDATING, false)
     }
 
+    @Suppress("unused")
     fun parsePubmedArticlesIn(string: String): List<PubmedArticle?> = parsePubmedArticlesIn(string.byteInputStream())
 
     fun parsePubmedArticlesIn(stream: InputStream): List<PubmedArticle?> {
@@ -40,7 +43,6 @@ class EFetchPubmedParser {
                                         DOI = allText("ArticleId")
                                     }
                                 }
-
                             }
                             "MedlineCitation" -> element("PMID", "Article") {
                                 // When we have an erratum, there are two PMID elements at different depths
@@ -54,8 +56,13 @@ class EFetchPubmedParser {
                                                     when (it) {
                                                         "Title" -> journalTitle = allText("Title")
                                                         "JournalIssue" ->
-                                                            element("PubDate") {
-                                                                year = tagText("Year")
+                                                            element("PubDate","Volume", "Issue") {
+                                                                when(it) {
+                                                                    "PubDate" -> year = tagText("Year")
+                                                                    "Volume" -> volume = allText("Volume")
+                                                                    "Issue" -> issue = allText("Issue")
+                                                                }
+
                                                             }
                                                         else -> {
                                                         }
@@ -87,12 +94,11 @@ class EFetchPubmedParser {
      */
     fun parsePubmedArticlesAsRaw(stream: InputStream): List<String> {
         val reader = factory.createXMLStreamReader(stream)
-        val articleList = reader.document {
-            if (this.hasText()) this.elementText
+        return reader.document {
+            if (hasText()) elementText
             element("PubmedArticle") {
                 contentAsXML("PubmedArticle")
             }
         }
-        return articleList
     }
 }

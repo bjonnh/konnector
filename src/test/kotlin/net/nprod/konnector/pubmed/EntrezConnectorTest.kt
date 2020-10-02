@@ -1,9 +1,11 @@
 package net.nprod.konnector.pubmed
 
+import io.ktor.util.*
 import net.nprod.konnector.pubmed.models.Esearch
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
+@KtorExperimentalAPI
 internal class EntrezConnectorTest {
     private val eFetchPubmedParser = EFetchPubmedParser()
     private var eSearchConn: EntrezConnector = EntrezConnector(null, 1000)
@@ -82,10 +84,17 @@ internal class EntrezConnectorTest {
         val output = eSearchConn.efetch(listOf(31444171))
 
         val article = output.result
-        val pmid = eFetchPubmedParser.parsePubmedArticlesIn(
-            article.byteInputStream()
-        ).getOrNull(0)?.pmid?.toLong()
+        val parsedArticle = eFetchPubmedParser.parsePubmedArticlesIn(
+                article.byteInputStream()
+        ).getOrNull(0)
+        val pmid = parsedArticle?.pmid?.toLong()
+        val year = parsedArticle?.year
+        val issue = parsedArticle?.issue
+        val volume = parsedArticle?.volume
 
         assertEquals(31444171, pmid)
+        assertEquals("2019", year)
+        assertEquals("9", issue)
+        assertEquals("63", volume)
     }
 }

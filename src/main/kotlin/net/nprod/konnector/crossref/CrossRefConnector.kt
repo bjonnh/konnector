@@ -1,42 +1,29 @@
 package net.nprod.konnector.crossref
 
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.ktor.util.KtorExperimentalAPI
+import kotlinx.serialization.*
+import kotlinx.serialization.json.*
 import net.nprod.konnector.commons.DecodingError
 
 
 @KtorExperimentalAPI
 class CrossRefConnector(private val API: CrossRefAPI) {
-    private val moshi: Moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
-        .build()
-    private val workAdapter: JsonAdapter<WorkResponse>
-    private val worksAdapter: JsonAdapter<WorksResponse>
+    val json = Json { ignoreUnknownKeys = true}
 
-    init {
-        workAdapter = moshi.adapter(WorkResponse::class.java)
-        worksAdapter = moshi.adapter(WorksResponse::class.java)
-    }
 
-    fun workFromDOIAsJson(doi: String): String {
-        return workAdapter.toJson(workFromDOI(doi))
-    }
+    fun workFromDOIAsJson(doi: String): String = json.encodeToString<WorkResponse>(workFromDOI(doi))
 
     fun workFromDOIAsJsonString(doi: String): String = workFromDOIAsJson(doi)
 
-    fun worksAsJson(title: String? = null, containerTitle: String? = null, query: String? = null): String {
-        return worksAdapter.toJson(worksIO(title, containerTitle, query))
-    }
+    fun worksAsJson(title: String? = null, containerTitle: String? = null, query: String? = null): String =
+        json.encodeToString<WorksResponse>(worksIO(title, containerTitle, query))
 
     fun worksAsJsonString(title: String? = null, containerTitle: String? = null, query: String? = null): String =
         worksAsJson(title, containerTitle, query)
 
     fun workFromDOI(doi: String): WorkResponse {
-        val output = API.call(API.apiURL + "/works/$doi")
-        val obj = workAdapter.fromJson(output)
-        return obj ?: throw DecodingError
+        val output: String = API.call(API.apiURL + "/works/$doi")
+        return json.decodeFromString<WorkResponse>(output)
     }
 
     fun works(
@@ -67,8 +54,8 @@ class CrossRefConnector(private val API: CrossRefAPI) {
         )
 
         try {
-            val obj = worksAdapter.fromJson(output)
-            return obj ?: throw DecodingError
+            val obj = json.decodeFromString<WorksResponse>(output)
+            return obj
         } catch (e: java.io.EOFException) {
             throw DecodingError
         }
