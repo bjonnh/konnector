@@ -13,15 +13,24 @@ import java.io.Closeable
 import java.util.concurrent.TimeUnit
 
 @Serializable
-data class GNFinderBestResult(
+data class GNFinderResult(
+    val dataSourceId: Int = -1,
     val dataSourceTitle: String = "",
     val taxonId: String = "",
-    val matchedCanonicalFull: String = ""
+    val matchedCanonicalFull: String = "",
+    val matchedName: String = "",
+    val matchedCardinality: Int? = null,
+    val matchedCanonicalSimple: String? = null,
+    val classificationPath: String?=null,
+    val classificationRank: String?=null,
+    val classificationIds: String?=null,
+    val matchType: String?=null,
 )
 
 @Serializable
 data class GNFinderVerification(
-    val bestResult: GNFinderBestResult? = null
+    val bestResult: GNFinderResult? = null,
+    val preferredResults: List<GNFinderResult>? = null
 )
 
 @Serializable

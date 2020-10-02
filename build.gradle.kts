@@ -2,7 +2,7 @@ import com.google.protobuf.gradle.*
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.16" + if (System.getProperty("snapshot")?.isEmpty() != false) {
+version = "0.1.22" + if (System.getProperty("snapshot")?.isEmpty() != false) {
     ""
 } else {
     "-SNAPSHOT"
