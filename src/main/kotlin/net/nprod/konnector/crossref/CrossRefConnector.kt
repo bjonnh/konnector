@@ -5,10 +5,12 @@ import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import net.nprod.konnector.commons.DecodingError
 
+class SocketTimeoutException: Exception()
+class NoRouteToHostException: Exception()
 
 @KtorExperimentalAPI
 class CrossRefConnector(private val API: CrossRefAPI) {
-    val json = Json { ignoreUnknownKeys = true}
+    val json = Json { ignoreUnknownKeys = true }
 
 
     fun workFromDOIAsJson(doi: String): String = json.encodeToString<WorkResponse>(workFromDOI(doi))
@@ -48,14 +50,19 @@ class CrossRefConnector(private val API: CrossRefAPI) {
         if (containerTitle != null)
             parameters["query.container-title"] = containerTitle
 
-        val output = API.call(
-            API.apiURL + "/works",
-            parameters
-        )
+        val output = try {
+            API.call(
+                API.apiURL + "/works",
+                parameters
+            )
+        } catch (e: io.ktor.network.sockets.SocketTimeoutException) {
+            throw SocketTimeoutException()
+        } catch (e: java.net.NoRouteToHostException) {
+            throw NoRouteToHostException()
+        }
 
-        try {
-            val obj = json.decodeFromString<WorksResponse>(output)
-            return obj
+        return try {
+            json.decodeFromString<WorksResponse>(output)
         } catch (e: java.io.EOFException) {
             throw DecodingError
         }
