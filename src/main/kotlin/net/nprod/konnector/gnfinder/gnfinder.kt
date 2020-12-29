@@ -1,3 +1,12 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.gnfinder
 
 import com.google.protobuf.util.JsonFormat
@@ -21,10 +30,10 @@ data class GNFinderResult(
     val matchedName: String = "",
     val matchedCardinality: Int? = null,
     val matchedCanonicalSimple: String? = null,
-    val classificationPath: String?=null,
-    val classificationRank: String?=null,
-    val classificationIds: String?=null,
-    val matchType: String?=null,
+    val classificationPath: String? = null,
+    val classificationRank: String? = null,
+    val classificationIds: String? = null,
+    val matchType: String? = null,
 )
 
 @Serializable
@@ -50,7 +59,6 @@ data class GNFinderNames(
 data class GNFinderResponse(
     val names: List<GNFinderNames>? = listOf()
 )
-
 
 fun voidRequest(): Gnfinder.Void = Gnfinder.Void.newBuilder().build()
 

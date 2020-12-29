@@ -1,12 +1,22 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.pubmed
 
+import io.ktor.client.HttpClient
 import io.ktor.client.statement.HttpResponse
 import io.ktor.util.KtorExperimentalAPI
 import mu.KotlinLogging
 import net.nprod.konnector.commons.BadRequestError
 import net.nprod.konnector.commons.WebAPI
 import net.nprod.konnector.pubmed.models.Esearch
-import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 
 /**
  * Create a new entrez connector (see https://www.ncbi.nlm.nih.gov/books/NBK25497/)
@@ -22,16 +32,16 @@ import org.slf4j.LoggerFactory
 
 @KtorExperimentalAPI
 class EntrezConnector(private val apikey: String? = null, val delay: Long? = null) : WebAPI {
-    override val log = KotlinLogging.logger(this::class.java.name)
-    override var httpClient = newClient("net.nprod.connector.pubmed")
-    override var delayTime = delay ?: if (apikey == null) 334L else 101L  // Delay in ms between each request
+    override val log: Logger = KotlinLogging.logger(this::class.java.name)
+    override var httpClient: HttpClient = newClient()
+    override var delayTime: Long = delay ?: if (apikey == null) 334L else 101L // Delay in ms between each request
     override var lastQueryTime: Long = System.currentTimeMillis()
-    var eSearchapiURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
-    var eFetchapiURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-    val defaultParameters: MutableMap<String, String> = mutableMapOf(
+    internal var eSearchapiURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
+    internal var eFetchapiURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+
+    internal val defaultParameters: MutableMap<String, String> = mutableMapOf(
         "db" to "pubmed"
     ).apply { if (apikey != null) this["api_key"] = apikey }
-
 
     /**
      * Updates the necessary delay from the HTTP headers received
@@ -77,22 +87,26 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
 
     fun esearchNext(query: Esearch, retmax: Int? = null, retstart: Int? = null): Esearch {
         if (query.query == "")
-            throw Error("Cannot continue with an empty query")
+            throw IllegalArgumentException("Cannot continue with an empty query")
 
         return esearch(
-            query.query!!, retmax ?: query.esearchresult.retmax,
+            query.query!!,
+            retmax ?: query.esearchresult.retmax,
             retstart ?: (query.esearchresult.retstart ?: 0) + (query.esearchresult.retmax ?: 10),
-            webenv = query.esearchresult.webenv, usehistory = query.esearchresult.webenv != null,
+            webenv = query.esearchresult.webenv,
+            usehistory = query.esearchresult.webenv != null,
             querykey = query.esearchresult.querykey
         )
     }
 
     fun iterate(
-        ids: List<Long>? = null, webenv: String? = null, querykey: Int? = null, retmax: Int = 10,
-        retstart: Int = 0, idlist:
-        Boolean = false,
-        block:
-            (EFetch) -> Unit
+        ids: List<Long>? = null,
+        webenv: String? = null,
+        querykey: Int? = null,
+        retmax: Int = 10,
+        retstart: Int = 0,
+        idlist: Boolean = false,
+        block: (EFetch) -> Unit
     ) {
         var resultsLeft = true
         var newWebEnv = webenv
@@ -103,8 +117,11 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
             try {
                 val fetchResult = this.efetch(
                     ids = ids,
-                    webenv = newWebEnv, querykey = newQueryKey,
-                    retmax = retmax, retstart = newRetStart, idlist = idlist
+                    webenv = newWebEnv,
+                    querykey = newQueryKey,
+                    retmax = retmax,
+                    retstart = newRetStart,
+                    idlist = idlist
                 )
 
                 newWebEnv = fetchResult.webenv ?: newWebEnv
@@ -112,7 +129,6 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
                 newQueryKey = fetchResult.querykey ?: 1
 
                 block(fetchResult)
-
             } catch (e: BadRequestError) {
                 resultsLeft = false
             }
@@ -165,4 +181,3 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
         return "OK"
     }
 }
-

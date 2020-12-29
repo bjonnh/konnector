@@ -1,8 +1,10 @@
 package net.nprod.konnector.pubmed
 
-import io.ktor.util.*
+import io.ktor.util.KtorExperimentalAPI
 import net.nprod.konnector.pubmed.models.Esearch
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 @KtorExperimentalAPI
@@ -39,7 +41,7 @@ internal class EntrezConnectorTest {
     @Test
     fun `Append using history server`() {
         val output = eSearchConn.esearch("curcumin", retmax = 2, usehistory = true)
-        val nextOutput = eSearchConn.esearchNext(output)
+        eSearchConn.esearchNext(output)
         assertNotNull(output.esearchresult.querykey)
         assertNotNull(output.esearchresult.webenv)
     }
@@ -72,7 +74,7 @@ internal class EntrezConnectorTest {
             ).asString()
         )
 
-        val toUpdate = eSearchConn.getNewIDs(
+        eSearchConn.getNewIDs(
             (eSearch.esearchresult.webenv ?: ""),
             (eSearch.esearchresult.querykey ?: 1),
             retmax = 2
@@ -85,7 +87,7 @@ internal class EntrezConnectorTest {
 
         val article = output.result
         val parsedArticle = eFetchPubmedParser.parsePubmedArticlesIn(
-                article.byteInputStream()
+            article.byteInputStream()
         ).getOrNull(0)
         val pmid = parsedArticle?.pmid?.toLong()
         val year = parsedArticle?.year

@@ -1,10 +1,24 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.commons
 
-import javax.xml.stream.XMLOutputFactory
-import javax.xml.stream.XMLStreamReader
 import java.io.StringWriter
+import javax.xml.stream.XMLOutputFactory
+import javax.xml.stream.XMLStreamException
+import javax.xml.stream.XMLStreamReader
 import javax.xml.stream.events.XMLEvent
 
+/**
+ * Exception thrown when an unexpected XML element has been found
+ */
+class UnexpectedXMLElementException(override val message: String) : Exception()
 
 /**
  * Is the current entry of type CDATA or CHARACTERS
@@ -12,6 +26,7 @@ import javax.xml.stream.events.XMLEvent
 
 val XMLStreamReader.isText: Boolean
     get() = (this.eventType == XMLStreamReader.CHARACTERS) or (this.eventType == XMLStreamReader.CDATA)
+
 /**
  * If the current element is a start or end element, return its name, if not returns null
  * It is useful when using takeWhile that calculates the full expression
@@ -19,7 +34,6 @@ val XMLStreamReader.isText: Boolean
 
 val XMLStreamReader.localNameValidated: String?
     get() = if (this.isEndElement or this.isStartElement) this.localName else null
-
 
 class ElementList<T>(l: List<T>, val stream: XMLStreamReader) : List<T> by l
 
@@ -86,7 +100,7 @@ fun XMLStreamReader.contentAsXML(tagName: String): String {
             }
             XMLEvent.CHARACTERS -> writer.writeCharacters(this.textCharacters, this.textStart, this.textLength)
             XMLEvent.PROCESSING_INSTRUCTION -> writer.writeProcessingInstruction(this.piTarget, this.piData)
-            else -> throw Error("Unhandled element ${this.eventType}")
+            else -> throw UnexpectedXMLElementException("Unhandled element ${this.eventType}")
         }
     }.toList()
     writer.writeEndElement()
@@ -116,10 +130,13 @@ fun XMLStreamReader.element(tagName: String): XMLStreamReader {
 
 fun <T> XMLStreamReader.element(vararg tagName: String, transform: (String) -> T): ElementList<T> {
     val currentTagName = this.localName
-    return ElementList(this.asSequence().takeWhile { (!it.isEndElement or (it.localNameValidated != currentTagName)) }
-        .filter { it.isStartElement }.filter { it.localName in tagName }.map {
-            transform(it.localName)
-        }.toList(), this)
+    return ElementList(
+        this.asSequence().takeWhile { (!it.isEndElement or (it.localNameValidated != currentTagName)) }
+            .filter { it.isStartElement }.filter { it.localName in tagName }.map {
+                transform(it.localName)
+            }.toList(),
+        this
+    )
 }
 
 /**
@@ -131,7 +148,11 @@ class XMLStreamReaderIterator(val reader: XMLStreamReader) : Iterator<XMLStreamR
     override fun hasNext(): Boolean = reader.hasNext()
 
     override fun next(): XMLStreamReader {
-        reader.next()
+        try {
+            reader.next()
+        } catch (e: XMLStreamException) {
+            throw NoSuchElementException()
+        }
         return reader
     }
 }

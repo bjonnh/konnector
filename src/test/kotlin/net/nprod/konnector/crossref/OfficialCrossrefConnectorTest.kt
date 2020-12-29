@@ -9,7 +9,7 @@ internal class OfficialCrossrefConnectorTest {
 
     @Test
     fun `basic search`() {
-        val output: WorksResponse = connector.works(query="bisson can invalid bioactives medicinal 10.1021/acs.jmedchem.5b01009")
+        val output: WorksResponse = connector.works(query = "bisson can invalid bioactives medicinal 10.1021/acs.jmedchem.5b01009")
         assert(output.message?.items?.get(0)?.DOI == "10.1021/acs.jmedchem.5b01009")
     }
 }

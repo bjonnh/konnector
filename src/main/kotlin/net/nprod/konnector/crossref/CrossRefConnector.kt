@@ -1,17 +1,28 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.crossref
 
 import io.ktor.util.KtorExperimentalAPI
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import net.nprod.konnector.commons.DecodingError
+import java.net.NoRouteToHostException
+import java.net.SocketTimeoutException
 
-class SocketTimeoutException: Exception()
-class NoRouteToHostException: Exception()
-
+/**
+ * Connect to a real CrossREF compliant endpoint
+ */
 @KtorExperimentalAPI
 class CrossRefConnector(private val API: CrossRefAPI) {
-    val json = Json { ignoreUnknownKeys = true }
-
+    private val json = Json { ignoreUnknownKeys = true }
 
     fun workFromDOIAsJson(doi: String): String = json.encodeToString<WorkResponse>(workFromDOI(doi))
 
@@ -30,13 +41,15 @@ class CrossRefConnector(private val API: CrossRefAPI) {
 
     fun works(
         title: String? = null,
-        containerTitle: String? = null, query: String? = null
+        containerTitle: String? = null,
+        query: String? = null
     ): WorksResponse =
         worksIO(title, containerTitle, query)
 
     fun worksIO(
         title: String? = null,
-        containerTitle: String? = null, query: String? = null
+        containerTitle: String? = null,
+        query: String? = null
     ): WorksResponse {
         val parameters = mutableMapOf(
             "select" to "DOI,title,container-title,published-print,published-online,author,abstract,volume",
@@ -57,15 +70,14 @@ class CrossRefConnector(private val API: CrossRefAPI) {
             )
         } catch (e: io.ktor.network.sockets.SocketTimeoutException) {
             throw SocketTimeoutException()
-        } catch (e: java.net.NoRouteToHostException) {
+        } catch (e: NoRouteToHostException) {
             throw NoRouteToHostException()
         }
 
         return try {
-            json.decodeFromString<WorksResponse>(output)
+            json.decodeFromString(output)
         } catch (e: java.io.EOFException) {
             throw DecodingError
         }
     }
 }
-

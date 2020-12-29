@@ -7,18 +7,15 @@
  */
 
 
-package net.nprod.konnector.crossref
+package net.nprod.konnector.gbif
 
 import io.ktor.util.KtorExperimentalAPI
 import net.nprod.konnector.commons.WebAPI
 
-/**
- * Interface for CrossRefAPIs, allows to mock
- */
 @KtorExperimentalAPI
-interface CrossRefAPI : WebAPI {
+interface GBIFAPI : WebAPI {
     /**
-     * The endpoint URL
+     * location of the API endpoint
      */
     val apiURL: String
 }

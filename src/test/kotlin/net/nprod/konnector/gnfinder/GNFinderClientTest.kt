@@ -3,7 +3,6 @@ package net.nprod.konnector.gnfinder
 import kotlinx.coroutines.asCoroutineDispatcher
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty
 import java.util.concurrent.Executors
@@ -39,12 +38,13 @@ internal class GNFinderClientTest {
 
     @Test
     fun findNamesWithSources() {
-        assert("Plantae|Tracheophyta|Liliopsida|Zingiberales|Zingiberaceae|Curcuma|Curcuma longa" in
-            client.findNames(
-                "The source of the compound, Curcuma longa, is a plant.",
-                sources = (1..182),
-                verification = true
-            )
+        assert(
+            "Plantae|Tracheophyta|Liliopsida|Zingiberales|Zingiberaceae|Curcuma|Curcuma longa" in
+                client.findNames(
+                    "The source of the compound, Curcuma longa, is a plant.",
+                    sources = (1..182),
+                    verification = true
+                )
         )
     }
 

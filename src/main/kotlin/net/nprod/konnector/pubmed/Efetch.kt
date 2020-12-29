@@ -1,9 +1,21 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.pubmed
 
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
-
+/**
+ * An object to keep the EFetch status of the last request
+ */
 data class EFetch(
     val webenv: String? = null,
     val querykey: Int? = null,
@@ -26,14 +38,19 @@ data class EFetch(
  * @param idlist When true, only returns the IDs
  */
 
+@KtorExperimentalAPI
 @Suppress("Duplicates")
 fun EntrezConnector.efetch(
-    ids: List<Long>? = null, retmax: Int? = null, retstart: Int? = null,
-    webenv: String? = null, querykey: Int? = null, idlist: Boolean = false
+    ids: List<Long>? = null,
+    retmax: Int? = null,
+    retstart: Int? = null,
+    webenv: String? = null,
+    querykey: Int? = null,
+    idlist: Boolean = false
 ): EFetch {
-    if ((!webenv.isNullOrEmpty()) and (!ids.isNullOrEmpty())) throw Error("Cannot work with ids and WebEnv")
+    if ((!webenv.isNullOrEmpty()) and (!ids.isNullOrEmpty())) throw IllegalArgumentException("Cannot work with ids and WebEnv")
     // TODO Find why it was there in the first place
-    //if ((webenv == null) and (querykey != null)) throw Error("querykey only works with a webenv gave querykey=${querykey}")
+    // if ((webenv == null) and (querykey != null)) throw Error("querykey only works with a webenv gave querykey=${querykey}")
 
     val parameters = defaultParameters.toMutableMap()
 
@@ -56,7 +73,6 @@ fun EntrezConnector.efetch(
     if (webenv != null)
         parameters["webenv"] = webenv
 
-
     if (querykey != null)
         parameters["query_key"] = querykey.toString()
     runBlocking { delay(calcDelay()) }
@@ -64,7 +80,7 @@ fun EntrezConnector.efetch(
     log.debug(" With parameters: $parameters")
     val call = call(eFetchapiURL, parameters)
 
-    return EFetch(result=call)
+    return EFetch(result = call)
 }
 
 /**
@@ -77,9 +93,11 @@ fun EntrezConnector.efetch(
  * @param retstart The starting offset for that query (can be null, in that case it takes the value from query).
  */
 
+@KtorExperimentalAPI
 fun EntrezConnector.efetchNext(query: EFetch, retmax: Int? = null, retstart: Int? = null): EFetch {
     return efetch(
-        null, retmax = retmax ?: query.retmax,
+        null,
+        retmax = retmax ?: query.retmax,
         retstart = retstart ?: (query.retstart ?: 0) + (query.retmax ?: 10),
         webenv = query.webenv,
         querykey = query.querykey

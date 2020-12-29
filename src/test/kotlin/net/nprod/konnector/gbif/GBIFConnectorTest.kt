@@ -1,7 +1,7 @@
 package net.nprod.konnector.gbif
 
-import io.ktor.util.*
-import org.junit.jupiter.api.Assertions.*
+import io.ktor.util.KtorExperimentalAPI
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 @KtorExperimentalAPI
@@ -10,8 +10,10 @@ internal class GBIFConnectorTest {
 
     @Test
     fun `taxon occurrence search`() {
-        val output = connector.occurenceOfTaxon("1",
-        offset=42)
+        val output = connector.occurenceOfTaxon(
+            "1",
+            offset = 42
+        )
         assertEquals(42, output.offset)
     }
 

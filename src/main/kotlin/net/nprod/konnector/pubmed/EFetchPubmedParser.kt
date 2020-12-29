@@ -1,12 +1,26 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.pubmed
 
 import com.ctc.wstx.stax.WstxInputFactory
-import io.ktor.util.*
-import net.nprod.konnector.commons.*
+import io.ktor.util.KtorExperimentalAPI
+import net.nprod.konnector.commons.CachingXMLResolver
+import net.nprod.konnector.commons.allText
+import net.nprod.konnector.commons.attributes
+import net.nprod.konnector.commons.contentAsXML
+import net.nprod.konnector.commons.document
+import net.nprod.konnector.commons.element
+import net.nprod.konnector.commons.tagText
 import net.nprod.konnector.pubmed.models.PubmedArticle
 import org.codehaus.stax2.XMLInputFactory2
 import java.io.InputStream
-
 import javax.xml.stream.XMLInputFactory
 
 /**
@@ -38,7 +52,7 @@ class EFetchPubmedParser {
                         when (it) {
                             "ArticleIdList" -> element("ArticleId") {
 
-                                attributes["IdType"]?.let {idType ->
+                                attributes["IdType"]?.let { idType ->
                                     if (idType == "doi") {
                                         DOI = allText("ArticleId")
                                     }
@@ -47,8 +61,7 @@ class EFetchPubmedParser {
                             "MedlineCitation" -> element("PMID", "Article") {
                                 // When we have an erratum, there are two PMID elements at different depths
                                 // this also shows that parsing xml by streaming like that isn't perfect
-                                if (it == "PMID") { if (pmid == null) pmid = allText("PMID") }
-                                else if (it == "Article") {
+                                if (it == "PMID") { if (pmid == null) pmid = allText("PMID") } else if (it == "Article") {
                                     element("Journal", "Abstract", "ArticleTitle") {
                                         when (it) {
                                             "Journal" -> {
@@ -56,13 +69,12 @@ class EFetchPubmedParser {
                                                     when (it) {
                                                         "Title" -> journalTitle = allText("Title")
                                                         "JournalIssue" ->
-                                                            element("PubDate","Volume", "Issue") {
-                                                                when(it) {
+                                                            element("PubDate", "Volume", "Issue") {
+                                                                when (it) {
                                                                     "PubDate" -> year = tagText("Year")
                                                                     "Volume" -> volume = allText("Volume")
                                                                     "Issue" -> issue = allText("Issue")
                                                                 }
-
                                                             }
                                                         else -> {
                                                         }

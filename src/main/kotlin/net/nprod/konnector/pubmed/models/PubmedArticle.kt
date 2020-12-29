@@ -1,6 +1,15 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.pubmed.models
 
-import kotlinx.serialization.*
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
@@ -15,5 +24,5 @@ data class PubmedArticle(
     var issue: String? = null
 ) {
     @Suppress("unused")
-    fun asString(): String = Json.encodeToString(serializer(),this)
+    fun asString(): String = Json.encodeToString(serializer(), this)
 }

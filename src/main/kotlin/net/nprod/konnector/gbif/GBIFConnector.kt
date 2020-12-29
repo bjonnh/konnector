@@ -1,3 +1,12 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.gbif
 
 import io.ktor.util.KtorExperimentalAPI
@@ -13,23 +22,23 @@ data class Occurence(
 )
 
 @Serializable
-data class OccurenceSearchResponse (
-    val offset: Int?=null,
-    val limit: Int?=null,
+data class OccurenceSearchResponse(
+    val offset: Int? = null,
+    val limit: Int? = null,
     val endOfRecords: Boolean,
-    val count: Long?=null,
+    val count: Long? = null,
     val results: List<Occurence>
 )
 
 @Serializable
 data class TaxonSearchResponse(
     val usageKey: Int? = null,
-    val scientificName: String?=null,
-    val canonicalName: String?=null,
-    val rank: String?=null,
-    val status: String?=null,
-    val confidence: Int?=null,
-    val matchType: String?=null,
+    val scientificName: String? = null,
+    val canonicalName: String? = null,
+    val rank: String? = null,
+    val status: String? = null,
+    val confidence: Int? = null,
+    val matchType: String? = null,
     val kinkdom: String? = null,
     val phylum: String? = null,
     val order: String? = null,
@@ -43,7 +52,7 @@ data class TaxonSearchResponse(
     val familyKey: Int? = null,
     val genusKey: Int? = null,
     val speciesKey: Int? = null,
-    val synonym: Boolean?=null,
+    val synonym: Boolean? = null,
     val `class`: String? = null
 )
 
@@ -66,9 +75,13 @@ class GBIFConnector(private val API: GBIFAPI) {
         )
     }
 
-    fun occurenceOfTaxon(q: String? = null, taxonKey: String? = null,
-    limit: Int = 20, offset: Int = 0,
-    basisOfRecord: String? = null): OccurenceSearchResponse {
+    fun occurenceOfTaxon(
+        q: String? = null,
+        taxonKey: String? = null,
+        limit: Int = 20,
+        offset: Int = 0,
+        basisOfRecord: String? = null
+    ): OccurenceSearchResponse {
         val parameters = mutableMapOf(
             "limit" to "$limit",
             "offset" to "$offset"

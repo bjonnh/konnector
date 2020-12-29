@@ -1,8 +1,19 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 @file:Suppress("unused", "SpellCheckingInspection")
 
 package net.nprod.konnector.pubmed.models
 
-import kotlinx.serialization.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 @Serializable
@@ -22,7 +33,7 @@ sealed class GenericTranslationStackElement
 @Serializable
 data class OperatorStackElement(
     val operator: String
-): GenericTranslationStackElement()
+) : GenericTranslationStackElement()
 
 @Serializable
 data class TranslationStackElement(
@@ -41,7 +52,7 @@ data class Esearchresult(
     val webenv: String? = null,
     var idlist: List<Int>? = null,
     var translationset: List<Translation>? = null,
-    //val translationstack: List<TranslationStackElement>, // This isn't easy to do with Moshi
+    // val translationstack: List<TranslationStackElement>, // This isn't easy to do with Moshi
     var querytranslation: String? = null
 )
 
@@ -62,7 +73,7 @@ data class Esearch(
     /**
      * Get this object as a JSON string
      */
-    fun asString(): String = Json.encodeToString(serializer(),this)
+    fun asString(): String = Json.encodeToString(serializer(), this)
 
     /**
      * Reduce the size of the object, mainly used to continue queries and fetch the next entries
@@ -72,7 +83,6 @@ data class Esearch(
         esearchresult.translationset = null
         esearchresult.querytranslation = null
     }
-
 
     /**
      * Grab the number of citations that are can still be obtained (dynamic)
@@ -95,8 +105,9 @@ data class Esearch(
      * Build an object from a JSON string
      */
     companion object {
-        fun fromString(str: String): Esearch = try { Json.decodeFromString(serializer(), str) }
-        catch (e: SerializationException) {
+        fun fromString(str: String): Esearch = try {
+            Json.decodeFromString(serializer(), str)
+        } catch (e: SerializationException) {
             throw ParsingError("Invalid JSON $e")
         }
     }

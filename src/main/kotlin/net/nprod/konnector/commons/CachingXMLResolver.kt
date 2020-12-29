@@ -1,3 +1,12 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.commons
 
 import io.ktor.client.HttpClient
@@ -8,7 +17,6 @@ import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
 import javax.xml.stream.XMLResolver
-
 
 /**
  * A resolver that stores the DTDs that have already been downloaded in a cache.
@@ -22,7 +30,7 @@ class CachingXMLResolver : XMLResolver {
     internal val logger = KotlinLogging.logger {}
 
     override fun resolveEntity(publicID: String?, systemID: String?, baseURI: String?, namespace: String?): String {
-        if ((systemID == "mathml-in-pubmed.mod") or (systemID==null)) return ""
+        if ((systemID == "mathml-in-pubmed.mod") or (systemID == null)) return ""
         logger.debug("publicID: $publicID  systemID: $systemID  baseURI: $baseURI, namespace: $namespace")
         if (!store.containsKey(systemID)) { // Checks in cache
             // We take the name of the file

@@ -1,10 +1,18 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.pubmed
 
+import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
-
 import net.nprod.konnector.pubmed.models.Esearch
 
 /**
@@ -19,12 +27,18 @@ import net.nprod.konnector.pubmed.models.Esearch
  * @param countonly This query is only for counting (useful to send to other services through the webenv)
  */
 
+@KtorExperimentalAPI
 fun EntrezConnector.esearch(
-    query: String, retmax: Int? = null, retstart: Int? = null, usehistory: Boolean = false,
-    webenv: String? = null, querykey: Int? = null, countonly: Boolean = false
+    query: String,
+    retmax: Int? = null,
+    retstart: Int? = null,
+    usehistory: Boolean = false,
+    webenv: String? = null,
+    querykey: Int? = null,
+    countonly: Boolean = false
 ): Esearch {
-    if ((webenv != null) and !usehistory) throw Error("WebEnv only works with usehistory=true")
-    if (((webenv == null) or !usehistory) and (querykey != null)) throw Error(
+    if ((webenv != null) and !usehistory) throw IllegalArgumentException("WebEnv only works with usehistory=true")
+    if (((webenv == null) or !usehistory) and (querykey != null)) throw IllegalArgumentException(
         "querykey only works with " +
                 "usehistory=true and a webenv"
     )
@@ -53,7 +67,8 @@ fun EntrezConnector.esearch(
         parameters["rettype"] = "count"
 
     val call = call(
-        eSearchapiURL, parameters
+        eSearchapiURL,
+        parameters
     )
 
     runBlocking { delay(calcDelay()) }

@@ -1,4 +1,9 @@
-import com.google.protobuf.gradle.*
+import com.google.protobuf.gradle.generateProtoTasks
+import com.google.protobuf.gradle.id
+import com.google.protobuf.gradle.ofSourceSet
+import com.google.protobuf.gradle.plugins
+import com.google.protobuf.gradle.protobuf
+import com.google.protobuf.gradle.protoc
 
 plugins {
     id("java")
@@ -16,6 +21,16 @@ plugins {
     id("org.jmailen.kotlinter")
 }
 
+buildscript {
+    val protobufPluginVersion: String by project
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        "classpath"("com.google.protobuf:protobuf-gradle-plugin:$protobufPluginVersion")
+    }
+}
+
 val publicationName = "maven"
 group = "net.nprod"
 version = "0.1.24" + if (System.getProperty("snapshot")?.isEmpty() != false) {
@@ -24,15 +39,13 @@ version = "0.1.24" + if (System.getProperty("snapshot")?.isEmpty() != false) {
     "-SNAPSHOT"
 }
 
-
 repositories {
     mavenCentral()
-
+    jcenter()
+    google()
     maven("https://kotlin.bintray.com/kotlinx")
     maven("http://oss.jfrog.org/artifactory/oss-snapshot-local/")
-    jcenter()
 }
-
 
 dependencies {
     val serializationRuntimeVersion: String by project
@@ -50,7 +63,7 @@ dependencies {
 
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx","kotlinx-serialization-json", serializationRuntimeVersion)
+    implementation("org.jetbrains.kotlinx", "kotlinx-serialization-json", serializationRuntimeVersion)
 
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion") {
         exclude("org.slf4j")
@@ -95,7 +108,7 @@ protobuf {
             artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
         }
         id("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion"
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion:jdk7@jar" // Why jdk7 still dealing with that Android old crap?
         }
     }
     generateProtoTasks {
@@ -144,7 +157,6 @@ tasks {
     }
 }
 
-
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
     from(sourceSets["main"].allSource)
@@ -165,11 +177,10 @@ publishing {
 
             from(components["java"])
             artifact(sourcesJar.get())
-            //artifact(javadocJar.get())
+            // artifact(javadocJar.get())
         }
     }
 }
-
 
 /**
  * Configuration of test framework
@@ -190,10 +201,34 @@ bintray {
     dryRun = false
     publish = true
     setPublications(publicationName)
-    pkg(delegateClosureOf<com.jfrog.bintray.gradle.BintrayExtension.PackageConfig> {
-        repo = "Konnector"
-        name = "konnector"
-        setLicenses("MIT")
-        vcsUrl = "https://github.com/bjonnh/konnector"
-    })
+    pkg(
+        delegateClosureOf<com.jfrog.bintray.gradle.BintrayExtension.PackageConfig> {
+            repo = "Konnector"
+            name = "konnector"
+            setLicenses("MIT")
+            vcsUrl = "https://github.com/bjonnh/konnector"
+        }
+    )
+}
+
+// Quality
+
+ktlint {
+    filter {
+        exclude { element -> element.file.path.contains("generated/") }
+        include("**/kotlin/**")
+    }
+}
+
+kotlinter {
+    ignoreFailures = project.hasProperty("lintContinueOnError")
+    experimentalRules = project.hasProperty("lintKotlinExperimental")
+}
+
+detekt {
+    val detektVersion: String by project
+    toolVersion = detektVersion
+    config = rootProject.files("qc/detekt.yml")
+    buildUponDefaultConfig = true
+    baseline = rootProject.file("qc/detekt-baseline.xml")
 }

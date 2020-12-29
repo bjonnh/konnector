@@ -1,3 +1,12 @@
+/*
+ *
+ * SPDX-License-Identifier: MIT License
+ *
+ * Copyright (c) 2020 Jonathan Bisson
+ *
+ */
+
+
 package net.nprod.konnector.commons
 
 import io.ktor.client.HttpClient
@@ -11,16 +20,31 @@ import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import mu.KLogger
-import mu.KotlinLogging
 import org.slf4j.Logger
 
-
+/**
+ * Any kind of WebAPI based on a Ktor HTTP Client
+ */
 @KtorExperimentalAPI
 interface WebAPI {
-    val log: KLogger
+    /**
+     * A logger
+     */
+    val log: Logger
 
-    var delayTime: Long  // Delay in ms between each request
+    /**
+     * Delay in ms between each request
+     */
+    var delayTime: Long
+
+    /**
+     * How long did the last query took
+     */
     var lastQueryTime: Long
+
+    /**
+     * The httpClient (this should maybe be let to the implementation?)
+     */
     var httpClient: HttpClient
 
     /**
@@ -39,11 +63,20 @@ interface WebAPI {
         lastQueryTime = System.currentTimeMillis()
     }
 
-    fun delayUpdate(call: HttpResponse) {
-        updateLastQueryTime()
-    }
+    /**
+     * Update the delay according to the response from a call, it allows you to read HTTP headers and update
+     * the delay accordingly.
+     */
+    fun delayUpdate(call: HttpResponse): Unit = updateLastQueryTime()
 
-    fun call(url: String, parameters: MutableMap<String, String>? = null, retries: Int=3): String {
+    /**
+     * call the API
+     *
+     * @param url The URL to query
+     * @param params a map of the HTTP request parameters that will be sent by GET (so don't make them too big)
+     * @param retries how many times the query is going to retry
+     */
+    fun call(url: String, parameters: MutableMap<String, String>? = null, retries: Int = 3): String {
         log.debug("Connecting to $url")
 
         return try {
@@ -51,7 +84,7 @@ interface WebAPI {
                 delay(calcDelay())
                 val response = httpClient.request<HttpResponse>(url) {
                     method = HttpMethod.Get
-                    parameters?.forEach { k, v -> parameter(k, v) }
+                    parameters?.forEach { (k, v) -> parameter(k, v) }
                 }
                 delayUpdate(response)
                 when (response.status.value) {
@@ -67,27 +100,35 @@ interface WebAPI {
             }
             call
         } catch (e: KnownError) {
-            if (retries>0) return call(url, parameters, retries - 1)
+            if (retries > 0) return call(url, parameters, retries - 1)
             throw e
         }
     }
 
-    fun newClient(module: String) = HttpClient(CIO) {
+    /**
+     * Obtain a new HTTP client
+     *
+     * @param module Unused kept for backward compatibility
+     */
+    @Deprecated(
+        level = DeprecationLevel.WARNING,
+        message = "This parameter was not used and is going to be removed",
+        replaceWith = ReplaceWith(expression = "newClient()")
+    )
+    fun newClient(module: String): HttpClient = newClient()
+
+    /**
+     * Obtain a new HTTP client
+     *
+     * @param module Unused kept for backward compatibility
+     */
+
+    fun newClient(): HttpClient = HttpClient(CIO) {
         expectSuccess = false
         engine {
             threadsCount = 4
-
             with(endpoint) {
-                maxConnectionsPerRoute = 100
-
-                pipelineMaxSize = 20
-
-                keepAliveTime = 5000
-
-                connectTimeout = 5000
-
-                connectRetryAttempts = 5
-
+                connectAttempts = 5
             }
         }
     }
