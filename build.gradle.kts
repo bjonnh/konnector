@@ -1,42 +1,29 @@
 import com.google.protobuf.gradle.*
 
+plugins {
+    id("java")
+    id("maven-publish")
+    kotlin("jvm")
+    kotlin("plugin.serialization")
+    id("com.google.protobuf")
+    id("com.github.ben-manes.versions")
+    id("com.jfrog.bintray")
+    id("com.github.johnrengelman.shadow")
+    id("org.jetbrains.dokka")
+    id("fr.coppernic.versioning")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("org.jmailen.kotlinter")
+}
+
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.22" + if (System.getProperty("snapshot")?.isEmpty() != false) {
+version = "0.1.24" + if (System.getProperty("snapshot")?.isEmpty() != false) {
     ""
 } else {
     "-SNAPSHOT"
 }
 
-var serializationRuntimeVersion = "1.0.0-RC2"
-val kotlinLoggingVersion = "1.8.0.1"
-var ktorVersion = "1.4.0"
-val woodstoxVersion = "6.2.1"
-val junitApiVersion = "5.6.0"
-val javaxAnnotationVersion = "1.3.2"
-val slf4jVersion = "2.11.2"
-// gnfinder
-val grpcVersion = "1.30.2"
-val grpcKotlinVersion = "0.1.4"
-val protobufVersion = "3.12.2"
-val coroutinesVersion = "1.4.0"
-
-// bintray/jfrog
-
-plugins {
-    val kotlinVersion = "1.4.10"
-    val protobufVersion = "0.8.12"
-    id("java")
-    id("maven-publish")
-    kotlin("jvm") version kotlinVersion
-    kotlin("plugin.serialization") version kotlinVersion
-    id("com.google.protobuf") version protobufVersion
-    id("com.github.ben-manes.versions") version "0.28.0"
-    id("com.jfrog.bintray") version "1.8.5"
-    id("com.github.johnrengelman.shadow") version "2.0.2"
-    id("org.jetbrains.dokka") version "1.4.0-rc"
-    id("fr.coppernic.versioning") version "3.1.2"
-}
 
 repositories {
     mavenCentral()
@@ -48,6 +35,19 @@ repositories {
 
 
 dependencies {
+    val serializationRuntimeVersion: String by project
+    val kotlinLoggingVersion: String by project
+    val ktorVersion: String by project
+    val woodstoxVersion: String by project
+    val junitApiVersion: String by project
+    val javaxAnnotationVersion: String by project
+    val slf4jVersion: String by project
+// gnfinder
+    val grpcVersion: String by project
+    val grpcKotlinVersion: String by project
+    val protobufVersion: String by project
+    val guavaVersion: String by project
+
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
     implementation("org.jetbrains.kotlinx","kotlinx-serialization-json", serializationRuntimeVersion)
@@ -64,7 +64,7 @@ dependencies {
 
     // Protobuf and grpc for gnfinder
     // We need this one as API because the client needs it
-    api("com.google.guava:guava:29.0-android")
+    api("com.google.guava:guava:$guavaVersion")
     implementation("com.google.protobuf:protobuf-java-util:$protobufVersion")
     implementation("io.grpc:grpc-protobuf:$grpcVersion")
     implementation("io.grpc:grpc-stub:$grpcVersion")
@@ -84,6 +84,9 @@ dependencies {
  */
 
 protobuf {
+    val protobufVersion: String by project
+    val grpcVersion: String by project
+    val grpcKotlinVersion: String by project
     protoc {
         artifact = "com.google.protobuf:protoc:$protobufVersion"
     }
@@ -133,7 +136,7 @@ tasks {
     }
 
     dokkaHtml.configure {
-        outputDirectory = buildDir.resolve("dokka").path
+        outputDirectory.set(buildDir.resolve("dokka"))
     }
 
     withType<com.jfrog.bintray.gradle.tasks.BintrayUploadTask> {

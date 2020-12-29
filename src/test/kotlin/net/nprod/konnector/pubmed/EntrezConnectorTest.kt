@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 @KtorExperimentalAPI
 internal class EntrezConnectorTest {
     private val eFetchPubmedParser = EFetchPubmedParser()
-    private var eSearchConn: EntrezConnector = EntrezConnector(null, 1000)
+    private var eSearchConn: EntrezConnector = EntrezConnector(System.getenv("NCBI_APIKEY"), 1000)
 
     @Test
     fun `basic search`() {

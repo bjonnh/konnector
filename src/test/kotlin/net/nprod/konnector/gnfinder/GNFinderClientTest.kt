@@ -9,7 +9,7 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty
 import java.util.concurrent.Executors
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-//@EnabledIfSystemProperty(named = "gnfinderTest", matches = "true")
+@EnabledIfSystemProperty(named = "gnfinderTest", matches = "true")
 internal class GNFinderClientTest {
     val dispatcher = Executors.newFixedThreadPool(10).asCoroutineDispatcher()
     val client = GNFinderClient("localhost:8778", dispatcher)

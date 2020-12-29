@@ -60,7 +60,8 @@ fun EntrezConnector.efetch(
     if (querykey != null)
         parameters["query_key"] = querykey.toString()
     runBlocking { delay(calcDelay()) }
-
+    log.info("Calling URL: $eFetchapiURL")
+    log.debug(" With parameters: $parameters")
     val call = call(eFetchapiURL, parameters)
 
     return EFetch(result=call)
