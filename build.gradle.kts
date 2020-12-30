@@ -4,6 +4,14 @@ import com.google.protobuf.gradle.ofSourceSet
 import com.google.protobuf.gradle.plugins
 import com.google.protobuf.gradle.protobuf
 import com.google.protobuf.gradle.protoc
+import java.util.Properties
+
+val localPropertiesFile = file("local.properties")
+val localProperties = if (localPropertiesFile.exists()) {
+    val properties = Properties()
+    properties.load(localPropertiesFile.inputStream())
+    properties
+} else null
 
 plugins {
     id("java")
@@ -33,7 +41,7 @@ buildscript {
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.24" + if (System.getProperty("snapshot")?.isEmpty() != false) {
+version = "0.1.25" + if (System.getProperty("snapshot")?.isEmpty() != false) {
     ""
 } else {
     "-SNAPSHOT"
@@ -169,6 +177,7 @@ val sourcesJar by tasks.registering(Jar::class) {
 }*/
 
 publishing {
+
     publications {
         create<MavenPublication>(publicationName) {
             groupId = project.group.toString()
@@ -178,6 +187,15 @@ publishing {
             from(components["java"])
             artifact(sourcesJar.get())
             // artifact(javadocJar.get())
+        }
+    }
+    repositories {
+        localProperties?.let {
+            val localMaven: String by it
+            maven {
+                name = "localDev"
+                url = uri("file:///$localMaven")
+            }
         }
     }
 }

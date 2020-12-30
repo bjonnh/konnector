@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class DateBlock(
     @SerialName("date-time") val datetime: String? = null,
-    @SerialName("date-parts") val dateParts: List<List<Int>>?,
+    @SerialName("date-parts") val dateParts: List<List<Int?>>?,
     val timestamp: Long? = null
     // Missing date-parts
     // Missing timestamp
