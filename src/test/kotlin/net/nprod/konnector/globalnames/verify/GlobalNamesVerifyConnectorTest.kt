@@ -49,12 +49,16 @@ internal class GlobalNamesVerifyConnectorTest {
             VerificationQuery(
                 nameStrings = listOf(
                     "Pomatomus soltator",
-                    "Bubu bubo (Linnaeus, 1758)"  // The error here is on purpose, so we get no preferred result
-                ), preferredSources = listOf(1, 12, 169), withVernaculars = false
+                    "Bubu bubo (Linnaeus, 1758)" // The error here is on purpose, so we get no preferred result
+                ),
+                preferredSources = listOf(1, 12, 169),
+                withVernaculars = false
             )
         )
         assert(source.size == 2)
-        assert(source.filter { it.input == "Pomatomus soltator" }
-            .first().bestResult?.currentName == "Pomatomus saltatrix (Linnaeus, 1766)")
+        assert(
+            source.filter { it.input == "Pomatomus soltator" }
+                .first().bestResult?.currentName == "Pomatomus saltatrix (Linnaeus, 1766)"
+        )
     }
 }

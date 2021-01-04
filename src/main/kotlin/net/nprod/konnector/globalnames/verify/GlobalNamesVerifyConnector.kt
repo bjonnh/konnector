@@ -8,7 +8,6 @@
 
 package net.nprod.konnector.globalnames.verify
 
-import com.google.protobuf.Field
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
