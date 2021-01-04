@@ -69,7 +69,6 @@ fun voidRequest(): Gnfinder.Void = Gnfinder.Void.newBuilder().build()
 /**
  * Connect to a local GNFinder instance accessible by gRPC
  */
-@Deprecated("Use globalnames.verify instead")
 class GNFinderClient(val target: String, private val dispatcher: ExecutorCoroutineDispatcher) : Closeable {
     private val channel =
         ManagedChannelBuilder.forTarget(target).usePlaintext().executor(dispatcher.asExecutor()).build()

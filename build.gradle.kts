@@ -41,10 +41,10 @@ buildscript {
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.26" + if (System.getProperty("snapshot")?.isEmpty() != false) {
-    ""
-} else {
+version = "0.1.27" + if ((System.getProperty("snapshot") ?: false) == true) {
     "-SNAPSHOT"
+} else {
+    ""
 }
 
 repositories {
@@ -186,8 +186,10 @@ publishing {
             version = project.version.toString()
 
             from(components["java"])
-            artifact(sourcesJar.get())
-            artifact(javadocJar.get())
+            if (!version.contains("SNAPSHOT")) {
+                artifact(sourcesJar.get())
+                artifact(javadocJar.get())
+            }
         }
     }
     repositories {
