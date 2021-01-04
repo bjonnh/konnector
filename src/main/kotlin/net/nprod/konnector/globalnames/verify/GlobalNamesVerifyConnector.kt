@@ -84,6 +84,9 @@ data class Verification(
  * Connects against GlobalNames verify
  *
  * It is not handling the in query name verification, but that shouldn't change anything for the end user
+ *
+ * There is some work to do so we get the "possible values" documented in the API doc handled properly:
+ * https://app.swaggerhub.com/apis-docs/dimus/gnames/1.0.0#/Verification
  */
 @ExperimentalTime
 @KtorExperimentalAPI
