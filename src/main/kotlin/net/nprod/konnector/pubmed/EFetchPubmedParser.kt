@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.pubmed
 
 import com.ctc.wstx.stax.WstxInputFactory
@@ -40,6 +39,7 @@ class EFetchPubmedParser {
     @Suppress("unused")
     fun parsePubmedArticlesIn(string: String): List<PubmedArticle?> = parsePubmedArticlesIn(string.byteInputStream())
 
+    @Suppress("ComplexMethod")
     fun parsePubmedArticlesIn(stream: InputStream): List<PubmedArticle?> {
 
         val reader = factory.createXMLStreamReader(stream)
@@ -54,14 +54,16 @@ class EFetchPubmedParser {
 
                                 attributes["IdType"]?.let { idType ->
                                     if (idType == "doi") {
-                                        DOI = allText("ArticleId")
+                                        doi = allText("ArticleId")
                                     }
                                 }
                             }
                             "MedlineCitation" -> element("PMID", "Article") {
                                 // When we have an erratum, there are two PMID elements at different depths
                                 // this also shows that parsing xml by streaming like that isn't perfect
-                                if (it == "PMID") { if (pmid == null) pmid = allText("PMID") } else if (it == "Article") {
+                                if (it == "PMID") {
+                                    if (pmid == null) pmid = allText("PMID")
+                                } else if (it == "Article") {
                                     element("Journal", "Abstract", "ArticleTitle") {
                                         when (it) {
                                             "Journal" -> {
@@ -89,7 +91,8 @@ class EFetchPubmedParser {
                                     }
                                 }
                             }
-                            else -> {}
+                            else -> {
+                            }
                         }
                     }
                 }

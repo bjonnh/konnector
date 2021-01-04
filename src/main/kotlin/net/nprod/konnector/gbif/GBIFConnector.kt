@@ -6,12 +6,13 @@
  *
  */
 
-
 package net.nprod.konnector.gbif
 
 import io.ktor.util.KtorExperimentalAPI
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.time.ExperimentalTime
 
 @Serializable
 data class Occurence(
@@ -53,19 +54,20 @@ data class TaxonSearchResponse(
     val genusKey: Int? = null,
     val speciesKey: Int? = null,
     val synonym: Boolean? = null,
-    val `class`: String? = null
+    @SerialName("class") val taxoClass: String? = null
 )
 
+@ExperimentalTime
 @KtorExperimentalAPI
-class GBIFConnector(private val API: GBIFAPI) {
+class GBIFConnector constructor(private val api: GBIFAPI) {
     private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
     }
 
     fun taxonkeyByName(name: String): TaxonSearchResponse {
-        val output = API.call(
-            API.apiURL + "species/match",
+        val output = api.call(
+            api.apiURL + "species/match",
             mutableMapOf("name" to name)
         )
 
@@ -99,8 +101,8 @@ class GBIFConnector(private val API: GBIFAPI) {
             parameters["q"] = it
         }
 
-        val output = API.call(
-            API.apiURL + "occurrence/search",
+        val output = api.call(
+            api.apiURL + "occurrence/search",
             parameters
         )
 

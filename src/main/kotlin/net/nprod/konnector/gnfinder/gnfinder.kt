@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.gnfinder
 
 import com.google.protobuf.util.JsonFormat
@@ -20,6 +19,11 @@ import protob.GNFinderGrpcKt
 import protob.Gnfinder
 import java.io.Closeable
 import java.util.concurrent.TimeUnit
+
+/**
+ * Default timeout for requests
+ */
+const val GNFINDER_DEFAULT_TIMEOUT: Long = 5
 
 @Serializable
 data class GNFinderResult(
@@ -114,6 +118,6 @@ class GNFinderClient(val target: String, private val dispatcher: ExecutorCorouti
     }
 
     override fun close() {
-        channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
+        channel.shutdown().awaitTermination(GNFINDER_DEFAULT_TIMEOUT, TimeUnit.SECONDS)
     }
 }

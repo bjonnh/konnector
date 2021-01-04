@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.crossref
 
 import kotlinx.serialization.SerialName
@@ -23,7 +22,7 @@ data class DateBlock(
 
 @Serializable
 data class Funder(
-    val DOI: String? = null,
+    @SerialName("DOI") val doi: String? = null,
     val name: String? = null,
     @SerialName("doi-asserted-by") val doiAssertedBy: String? = null,
     val award: List<String>? = null
@@ -42,7 +41,7 @@ data class Affiliation(
 
 @Serializable
 data class Author(
-    val ORCID: String? = null,
+    @SerialName("ORCID") val orcid: String? = null,
     @SerialName("authenticated-orcid") val authenticatedOrcid: Boolean? = null,
     val given: String? = null,
     val family: String? = null,
@@ -64,7 +63,7 @@ data class Reference(
 
 @Serializable
 data class Link(
-    val URL: String,
+    @SerialName("URL") val url: String,
     @SerialName("content-type") val contentType: String? = null,
     @SerialName("content-version") val contentVersion: String? = null,
     @SerialName("intended-application") val intendedApplication: String? = null
@@ -89,7 +88,7 @@ data class ISSN(
 
 @Serializable
 data class Explanation(
-    val URL: String? = null
+    @SerialName("URL") val url: String? = null
 )
 
 @Serializable
@@ -117,7 +116,7 @@ data class SingleWork(
     @SerialName("content-domain") val contentDomain: Domain? = null,
     @SerialName("short-container-title") val shortContainerTitle: List<String>? = null,
     val abstract: String? = null,
-    val DOI: String,
+    @SerialName("DOI") val doi: String,
     val type: String? = null,
     val created: DateBlock? = null,
     val page: String? = null,
@@ -143,9 +142,9 @@ data class SingleWork(
     val issued: DateBlock? = null,
     @SerialName("references-count") val referencesCount: Int? = null,
     @SerialName("journal-issue") val journalIssue: Issue? = null,
-    val URL: String? = null,
+    @SerialName("URL") val url: String? = null,
     val relation: Relation? = null,
-    val ISSN: List<String>? = null,
+    @SerialName("ISSN") val issn: List<String>? = null,
     @SerialName("issn-type") val issnType: List<ISSN>? = null,
     val assertion: List<Assertion>? = null
 )

@@ -1,38 +1,23 @@
-dist: bionic
-language: generic
+dist: focal
 
 services:
   - docker
 
-#env:
-#  - BATECT_CACHE_TYPE=directory
+language: generic
 
-#script: ./travis/build.sh
+env:
+  - BATECT_CACHE_TYPE=directory
+  - BATECT_ENABLE_TELEMETRY=false
 
-#before_cache:
-#  - rm -f  .batect/caches/gradle-cache/caches/modules-2/modules-2.lock
-#  - rm -fr .batect/caches/gradle-cache/caches/*/plugin-resolution/
-#  - rm -f  .batect/caches/gradle-cache/caches/*/fileHashes/fileHashes.bin
-#  - rm -f  .batect/caches/gradle-cache/caches/*/fileHashes/fileHashes.lock
-#  - rm -f  .batect/caches/gradle-cache/caches/*/javaCompile/javaCompile.lock
+script: ./travis/build.sh
+
+before_cache:
+  - rm -f  .batect/caches/gradle-cache/caches/modules-2/modules-2.lock
+  - rm -fr .batect/caches/gradle-cache/caches/*/plugin-resolution/
+  - rm -f  .batect/caches/gradle-cache/caches/*/fileHashes/fileHashes.bin
+  - rm -f  .batect/caches/gradle-cache/caches/*/fileHashes/fileHashes.lock
+  - rm -f  .batect/caches/gradle-cache/caches/*/javaCompile/javaCompile.lock
 
 cache:
   directories:
-    - .cache
-
-before_install:
-- mkdir -p .cache
-
-stages:
-  - name: test
-  - name: snapshot
-    if: branch = master
-  - name: release
-    if: branch = release
-
-jobs:
-  include:
-    - stage: test
-      script: docker-compose up --abort-on-container-exit
-    - stage: snapshot
-      script: docker run --rm -v $PWD:/code -e BINTRAY_KEY=${BINTRAY_KEY} -e BINTRAY_USER=${BINTRAY_USER} -v ${PWD}/.cache:/root/.gradle -w /code adoptopenjdk:11-jdk-hotspot ./gradlew -Dorg.gradle.daemon=false bintrayPublish -x test -Dsnapshot=true -Dbuild.number=$TRAVIS_BUILD_NUMBER
+    - .batect/caches

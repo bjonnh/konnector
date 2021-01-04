@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.crossref
 
 import io.ktor.util.KtorExperimentalAPI
@@ -14,14 +13,15 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.nprod.konnector.commons.DecodingError
-import java.net.NoRouteToHostException
 import java.net.SocketTimeoutException
+import kotlin.time.ExperimentalTime
 
 /**
  * Connect to a real CrossREF compliant endpoint
  */
 @KtorExperimentalAPI
-class CrossRefConnector(private val API: CrossRefAPI) {
+@ExperimentalTime
+class CrossRefConnector constructor(private val api: CrossRefAPI) {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun workFromDOIAsJson(doi: String): String = json.encodeToString<WorkResponse>(workFromDOI(doi))
@@ -35,7 +35,7 @@ class CrossRefConnector(private val API: CrossRefAPI) {
         worksAsJson(title, containerTitle, query)
 
     fun workFromDOI(doi: String): WorkResponse {
-        val output: String = API.call(API.apiURL + "/works/$doi")
+        val output: String = api.call(api.apiURL + "/works/$doi")
         return json.decodeFromString<WorkResponse>(output)
     }
 
@@ -64,20 +64,18 @@ class CrossRefConnector(private val API: CrossRefAPI) {
             parameters["query.container-title"] = containerTitle
 
         val output = try {
-            API.call(
-                API.apiURL + "/works",
+            api.call(
+                api.apiURL + "/works",
                 parameters
             )
         } catch (e: io.ktor.network.sockets.SocketTimeoutException) {
             throw SocketTimeoutException()
-        } catch (e: NoRouteToHostException) {
-            throw NoRouteToHostException()
         }
 
         return try {
             json.decodeFromString(output)
         } catch (e: java.io.EOFException) {
-            throw DecodingError
+            throw DecodingError("End of file received before the end of the JSON.")
         }
     }
 }

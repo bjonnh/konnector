@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.commons
 
 import io.ktor.client.HttpClient
@@ -16,15 +15,20 @@ import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readText
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import mu.KLogger
 import org.slf4j.Logger
+import kotlin.time.ExperimentalTime
+
+const val DEFAULT_HTTP_CLIENT_THREADS = 4
+const val DEFAULT_HTTP_CLIENT_CONNECT_ATTEMPTS = 5
 
 /**
  * Any kind of WebAPI based on a Ktor HTTP Client
  */
+@ExperimentalTime
 @KtorExperimentalAPI
 interface WebAPI {
     /**
@@ -46,6 +50,11 @@ interface WebAPI {
      * The httpClient (this should maybe be let to the implementation?)
      */
     var httpClient: HttpClient
+
+    /**
+     * Retry delay
+     */
+    var retryDelay: Long
 
     /**
      * Calculates the necessary delay in milliseconds by using the last time a query was made and the
@@ -75,7 +84,12 @@ interface WebAPI {
      * @param url The URL to query
      * @param params a map of the HTTP request parameters that will be sent by GET (so don't make them too big)
      * @param retries how many times the query is going to retry
+     * @throws NonExistentReference when we receive a 404 for a non existent entry
+     * @throws BadRequestError when we have an invalid request (400)
+     * @throws TooManyRequests when we had too many requests (429)
+     * @throws UnManagedReturnCode when we have a HTTP return code we don't know about
      */
+    @Suppress("ThrowsCount") // Yes we throw a lot, but for a good reason I guess
     fun call(url: String, parameters: MutableMap<String, String>? = null, retries: Int = 3): String {
         log.debug("Connecting to $url")
 
@@ -88,11 +102,11 @@ interface WebAPI {
                 }
                 delayUpdate(response)
                 when (response.status.value) {
-                    200 -> response.readText()
-                    404 -> throw NonExistentReference
-                    400 -> throw BadRequestError(response.readText())
-                    429 -> {
-                        delay(2_000)
+                    HttpStatusCode.OK.value -> response.readText()
+                    HttpStatusCode.NotFound.value -> throw NonExistentReference
+                    HttpStatusCode.BadRequest.value -> throw BadRequestError(response.readText())
+                    HttpStatusCode.TooManyRequests.value -> {
+                        delay(retryDelay)
                         throw TooManyRequests
                     } // We block for 2s in case of rate limiting trigger
                     else -> throw UnManagedReturnCode(response.status.value)
@@ -123,12 +137,14 @@ interface WebAPI {
      * @param module Unused kept for backward compatibility
      */
 
-    fun newClient(): HttpClient = HttpClient(CIO) {
-        expectSuccess = false
-        engine {
-            threadsCount = 4
-            with(endpoint) {
-                connectAttempts = 5
+    fun newClient(): HttpClient {
+        return HttpClient(CIO) {
+            expectSuccess = false
+            engine {
+                threadsCount = DEFAULT_HTTP_CLIENT_THREADS
+                with(endpoint) {
+                    connectAttempts = DEFAULT_HTTP_CLIENT_CONNECT_ATTEMPTS
+                }
             }
         }
     }

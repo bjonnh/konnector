@@ -6,7 +6,6 @@
  *
  */
 
-
 @file:Suppress("unused", "SpellCheckingInspection")
 
 package net.nprod.konnector.pubmed.models

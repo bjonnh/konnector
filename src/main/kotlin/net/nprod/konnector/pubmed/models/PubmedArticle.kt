@@ -6,9 +6,9 @@
  *
  */
 
-
 package net.nprod.konnector.pubmed.models
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -19,7 +19,7 @@ data class PubmedArticle(
     var abstract: String? = null,
     var articleTitle: String? = null,
     var year: String? = null,
-    var DOI: String? = null,
+    @SerialName("DOI") var doi: String? = null,
     var volume: String? = null,
     var issue: String? = null
 ) {

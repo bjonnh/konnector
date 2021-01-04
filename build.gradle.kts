@@ -116,7 +116,8 @@ protobuf {
             artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
         }
         id("grpckt") {
-            artifact = "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion:jdk7@jar" // Why jdk7 still dealing with that Android old crap?
+            artifact =
+                "io.grpc:protoc-gen-grpc-kotlin:$grpcKotlinVersion:jdk7@jar" // Why jdk7 still dealing with that Android old crap?
         }
     }
     generateProtoTasks {
@@ -170,11 +171,11 @@ val sourcesJar by tasks.registering(Jar::class) {
     from(sourceSets["main"].allSource)
 }
 
-/*val javadocJar by tasks.registering(Jar::class) {
-    dependsOn("dokkaH")
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn("dokkaJavadoc")
     archiveClassifier.set("javadoc")
     from("$buildDir/dokka")
-}*/
+}
 
 publishing {
 
@@ -235,6 +236,12 @@ ktlint {
     filter {
         exclude { element -> element.file.path.contains("generated/") }
         include("**/kotlin/**")
+    }
+}
+
+tasks {
+    "lintKotlinMain"(org.jmailen.gradle.kotlinter.tasks.LintTask::class) {
+        exclude { element -> element.file.path.contains("generated/") }
     }
 }
 

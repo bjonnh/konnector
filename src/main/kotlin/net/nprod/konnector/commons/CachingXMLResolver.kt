@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.commons
 
 import io.ktor.client.HttpClient

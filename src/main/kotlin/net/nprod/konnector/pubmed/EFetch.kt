@@ -6,12 +6,17 @@
  *
  */
 
-
 package net.nprod.konnector.pubmed
 
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlin.time.ExperimentalTime
+
+/**
+ * Default page size for eFetchNext
+ */
+const val ENTREZ_DEFAULT_MAXIMUM_RESULTS_NEXT: Int = 10
 
 /**
  * An object to keep the EFetch status of the last request
@@ -38,8 +43,9 @@ data class EFetch(
  * @param idlist When true, only returns the IDs
  */
 
+@ExperimentalTime
 @KtorExperimentalAPI
-@Suppress("Duplicates")
+@Suppress("Duplicates", "LongParameterList")
 fun EntrezConnector.efetch(
     ids: List<Long>? = null,
     retmax: Int? = null,
@@ -48,9 +54,11 @@ fun EntrezConnector.efetch(
     querykey: Int? = null,
     idlist: Boolean = false
 ): EFetch {
-    if ((!webenv.isNullOrEmpty()) and (!ids.isNullOrEmpty())) throw IllegalArgumentException("Cannot work with ids and WebEnv")
+    if ((!webenv.isNullOrEmpty()) and (!ids.isNullOrEmpty()))
+        throw IllegalArgumentException("Cannot work with ids and WebEnv")
     // TODO Find why it was there in the first place
-    // if ((webenv == null) and (querykey != null)) throw Error("querykey only works with a webenv gave querykey=${querykey}")
+    // if ((webenv == null) and (querykey != null))
+    //      throw Error("querykey only works with a webenv gave querykey=${querykey}")
 
     val parameters = defaultParameters.toMutableMap()
 
@@ -89,16 +97,17 @@ fun EntrezConnector.efetch(
  *
  * @param query The query to be continued
  * @param retmax The maximum number of results to return for that query (can be null, in that case it takes
- * the value from query).
+ * the value from query, which if it is null, will take the ENTREZ_DEFAULT_MAXIMUM_RESULTS_NEXT).
  * @param retstart The starting offset for that query (can be null, in that case it takes the value from query).
  */
 
+@ExperimentalTime
 @KtorExperimentalAPI
 fun EntrezConnector.efetchNext(query: EFetch, retmax: Int? = null, retstart: Int? = null): EFetch {
     return efetch(
         null,
-        retmax = retmax ?: query.retmax,
-        retstart = retstart ?: (query.retstart ?: 0) + (query.retmax ?: 10),
+        retmax = retmax ?: query.retmax ?: ENTREZ_DEFAULT_MAXIMUM_RESULTS_NEXT,
+        retstart = retstart ?: (query.retstart ?: 0) + (query.retmax ?: ENTREZ_DEFAULT_MAXIMUM_RESULTS_NEXT),
         webenv = query.webenv,
         querykey = query.querykey
     )

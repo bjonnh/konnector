@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.pubmed
 
 import io.ktor.client.HttpClient
@@ -17,6 +16,28 @@ import net.nprod.konnector.commons.BadRequestError
 import net.nprod.konnector.commons.WebAPI
 import net.nprod.konnector.pubmed.models.Esearch
 import org.slf4j.Logger
+import kotlin.time.ExperimentalTime
+import kotlin.time.seconds
+
+/**
+ * Default page size for esearchNext
+ */
+const val ENTREZ_DEFAULT_MAXIMUM_SEARCH_RESULTS_NEXT: Int = 10
+
+/**
+ * default delay when not logged in
+ */
+const val ENTREZ_DEFAULT_DELAY_TIME_NOT_LOGGED: Long = 334L
+
+/**
+ * default delay when logged in
+ */
+const val ENTREZ_DEFAULT_DELAY_TIME_LOGGED_IN: Long = 100L
+
+/**
+ * default delay when throttled
+ */
+const val ENTREZ_DEFAULT_RETRY_DELAY: Long = 2_000
 
 /**
  * Create a new entrez connector (see https://www.ncbi.nlm.nih.gov/books/NBK25497/)
@@ -30,11 +51,14 @@ import org.slf4j.Logger
  * client)
  */
 
+@ExperimentalTime
 @KtorExperimentalAPI
 class EntrezConnector(private val apikey: String? = null, val delay: Long? = null) : WebAPI {
     override val log: Logger = KotlinLogging.logger(this::class.java.name)
     override var httpClient: HttpClient = newClient()
-    override var delayTime: Long = delay ?: if (apikey == null) 334L else 101L // Delay in ms between each request
+    override var retryDelay: Long = ENTREZ_DEFAULT_RETRY_DELAY
+    override var delayTime: Long = delay
+        ?: if (apikey == null) ENTREZ_DEFAULT_DELAY_TIME_NOT_LOGGED else ENTREZ_DEFAULT_DELAY_TIME_LOGGED_IN
     override var lastQueryTime: Long = System.currentTimeMillis()
     internal var eSearchapiURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     internal var eFetchapiURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
@@ -50,18 +74,19 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
      * @param interval Is the period in the format <number>s (currently we have only seen 1s)
      *
      */
+    @ExperimentalTime
     private fun updateDelayFromHeaderData(limit: String? = "50", interval: String? = "1s") {
         val intervalInt = interval?.filter { it != 's' }?.toIntOrNull()
         val limitInt = limit?.toLongOrNull()
         if ((intervalInt != null) && (limitInt != null))
-            delayTime = 8_00 * intervalInt / limitInt
+            delayTime = (intervalInt / limitInt).seconds.toLongMilliseconds()
     }
 
     /**
      * We use a different approach in that module as the API can tell us to slow down (and they do)
      */
+    @ExperimentalTime
     override fun delayUpdate(call: HttpResponse) {
-
         updateDelayFromHeaderData(
             call.headers["X-RateLimit-Limit"],
             "1s"
@@ -91,14 +116,18 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
 
         return esearch(
             query.query!!,
-            retmax ?: query.esearchresult.retmax,
-            retstart ?: (query.esearchresult.retstart ?: 0) + (query.esearchresult.retmax ?: 10),
+            retmax ?: query.esearchresult.retmax ?: ENTREZ_DEFAULT_MAXIMUM_SEARCH_RESULTS_NEXT,
+            retstart ?: (query.esearchresult.retstart ?: 0) + (
+                query.esearchresult.retmax
+                    ?: ENTREZ_DEFAULT_MAXIMUM_SEARCH_RESULTS_NEXT
+                ),
             webenv = query.esearchresult.webenv,
             usehistory = query.esearchresult.webenv != null,
             querykey = query.esearchresult.querykey
         )
     }
 
+    @Suppress("LongParameterList")
     fun iterate(
         ids: List<Long>? = null,
         webenv: String? = null,
@@ -156,6 +185,7 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
     /**
      * This is a candidate for deletion, not sure what it is doing anymore.
      */
+    @Suppress("LongParameterList")
     fun getEntriesList(
         eFetchPubmedParser: EFetchPubmedParser,
         webenv: String? = null,

@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.commons
 
 import java.io.StringWriter

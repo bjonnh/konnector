@@ -6,12 +6,13 @@
  *
  */
 
-
 package net.nprod.konnector.gbif
 
 import io.ktor.util.KtorExperimentalAPI
 import net.nprod.konnector.commons.WebAPI
+import kotlin.time.ExperimentalTime
 
+@ExperimentalTime
 @KtorExperimentalAPI
 interface GBIFAPI : WebAPI {
     /**

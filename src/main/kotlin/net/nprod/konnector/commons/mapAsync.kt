@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.commons
 
 import kotlinx.coroutines.async

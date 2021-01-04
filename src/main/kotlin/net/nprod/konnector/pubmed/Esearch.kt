@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.pubmed
 
 import io.ktor.util.KtorExperimentalAPI
@@ -14,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.nprod.konnector.pubmed.models.Esearch
+import kotlin.time.ExperimentalTime
 
 /**
  * Runs a query on Esearch
@@ -27,7 +27,9 @@ import net.nprod.konnector.pubmed.models.Esearch
  * @param countonly This query is only for counting (useful to send to other services through the webenv)
  */
 
+@ExperimentalTime
 @KtorExperimentalAPI
+@Suppress("LongParameterList")
 fun EntrezConnector.esearch(
     query: String,
     retmax: Int? = null,
@@ -40,7 +42,7 @@ fun EntrezConnector.esearch(
     if ((webenv != null) and !usehistory) throw IllegalArgumentException("WebEnv only works with usehistory=true")
     if (((webenv == null) or !usehistory) and (querykey != null)) throw IllegalArgumentException(
         "querykey only works with " +
-                "usehistory=true and a webenv"
+            "usehistory=true and a webenv"
     )
 
     val parameters = defaultParameters.toMutableMap()

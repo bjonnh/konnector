@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.commons
 
 sealed class KnownError : RuntimeException()
@@ -15,7 +14,7 @@ sealed class KnownCriticalError : RuntimeException()
 object APIError : KnownError()
 object NonExistentReference : KnownError()
 data class BadRequestError(val content: String) : KnownError()
-object DecodingError : KnownError()
+class DecodingError(override val message: String) : KnownError()
 object TooManyRequests : KnownError()
 object TimeoutException : KnownError()
 

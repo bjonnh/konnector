@@ -6,7 +6,6 @@
  *
  */
 
-
 package net.nprod.konnector.crossref
 
 import io.ktor.client.HttpClient
@@ -15,20 +14,28 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.util.KtorExperimentalAPI
 import mu.KotlinLogging
 import org.slf4j.Logger
+import kotlin.time.ExperimentalTime
+import kotlin.time.seconds
+
+const val CROSSREF_DEFAULT_DELAY_BETWEEN_REQUEST: Long = 20
+const val CROSSREF_DEFAULT_RETRY_DELAY: Long = 2_000
 
 /**
  * Connects to the official CrossREF API
  */
+@ExperimentalTime
 @KtorExperimentalAPI
 class OfficialCrossRefAPI(
     private val networkKeepAliveTime: Long = 10000,
     private val networkConnectTimeout: Long = 20000,
     private val networkRequestTimeout: Long = 20000,
-    private val connectionAttempts: Int = 5
+    private val connectionAttempts: Int = 5,
+    private val numberOfThreads: Int = 4
 ) : CrossRefAPI {
     override val log: Logger = KotlinLogging.logger(this::class.java.name)
     override var httpClient: HttpClient = newClient()
-    override var delayTime: Long = 20L // Delay in ms between each request
+    override var retryDelay: Long = CROSSREF_DEFAULT_RETRY_DELAY
+    override var delayTime: Long = CROSSREF_DEFAULT_DELAY_BETWEEN_REQUEST
     override var lastQueryTime: Long = System.currentTimeMillis()
     override var apiURL: String = "https://api.crossref.org"
 
@@ -39,16 +46,18 @@ class OfficialCrossRefAPI(
      * @param interval Is the period in the format <number>s (currently we have only seen 1s)
      *
      */
+    @ExperimentalTime
     private fun updateDelayFromHeaderData(limit: String? = "50", interval: String? = "1s") {
         val intervalInt = interval?.filter { it != 's' }?.toIntOrNull()
         val limitInt = limit?.toLongOrNull()
         if ((intervalInt != null) && (limitInt != null))
-            delayTime = 1_000 * intervalInt / limitInt
+            delayTime = (intervalInt / limitInt).seconds.toLongMilliseconds()
     }
 
     /**
      * We use a different approach in that module as the API can tell us to slow down (and they do)
      */
+    @ExperimentalTime
     override fun delayUpdate(call: HttpResponse) {
         updateDelayFromHeaderData(
             call.headers["X-Rate-Limit-Limit"],
@@ -61,7 +70,7 @@ class OfficialCrossRefAPI(
     override fun newClient(): HttpClient = HttpClient(CIO) {
         expectSuccess = false
         engine {
-            threadsCount = 4
+            threadsCount = numberOfThreads
 
             with(endpoint) {
                 requestTimeout = networkRequestTimeout
