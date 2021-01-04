@@ -14,6 +14,8 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readText
+import io.ktor.content.TextContent
+import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
@@ -105,7 +107,7 @@ interface WebAPI {
                 val response = httpClient.request<HttpResponse>(url) {
                     method = if (post) HttpMethod.Post else HttpMethod.Get
                     parameters?.forEach { (k, v) -> parameter(k, v) }
-                    if (post) body?.let { this.body = body }
+                    if (post) body?.let { this.body = TextContent(body, contentType = ContentType.Application.Json) }
                 }
                 delayUpdate(response)
                 when (response.status.value) {
