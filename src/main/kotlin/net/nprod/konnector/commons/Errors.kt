@@ -12,7 +12,7 @@ sealed class KnownError : RuntimeException()
 sealed class KnownCriticalError : RuntimeException()
 
 object APIError : KnownError()
-object NonExistentReference : KnownError()
+object NonExistent : KnownError()
 data class BadRequestError(val content: String) : KnownError()
 class DecodingError(override val message: String) : KnownError()
 object TooManyRequests : KnownError()

@@ -84,26 +84,33 @@ interface WebAPI {
      * @param url The URL to query
      * @param params a map of the HTTP request parameters that will be sent by GET (so don't make them too big)
      * @param retries how many times the query is going to retry
-     * @throws NonExistentReference when we receive a 404 for a non existent entry
+     * @throws NonExistent when we receive a 404 for a non existent entry
      * @throws BadRequestError when we have an invalid request (400)
      * @throws TooManyRequests when we had too many requests (429)
      * @throws UnManagedReturnCode when we have a HTTP return code we don't know about
      */
     @Suppress("ThrowsCount") // Yes we throw a lot, but for a good reason I guess
-    fun call(url: String, parameters: MutableMap<String, String>? = null, retries: Int = 3): String {
+    fun call(
+        url: String,
+        parameters: Map<String, String>? = null,
+        retries: Int = 3,
+        post: Boolean = false,
+        body: String? = null
+    ): String {
         log.debug("Connecting to $url")
 
         return try {
             val call = runBlocking {
                 delay(calcDelay())
                 val response = httpClient.request<HttpResponse>(url) {
-                    method = HttpMethod.Get
+                    method = if (post) HttpMethod.Post else HttpMethod.Get
                     parameters?.forEach { (k, v) -> parameter(k, v) }
+                    if (post) body?.let { this.body = body }
                 }
                 delayUpdate(response)
                 when (response.status.value) {
                     HttpStatusCode.OK.value -> response.readText()
-                    HttpStatusCode.NotFound.value -> throw NonExistentReference
+                    HttpStatusCode.NotFound.value -> throw NonExistent
                     HttpStatusCode.BadRequest.value -> throw BadRequestError(response.readText())
                     HttpStatusCode.TooManyRequests.value -> {
                         delay(retryDelay)
