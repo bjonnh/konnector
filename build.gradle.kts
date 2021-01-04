@@ -187,7 +187,7 @@ publishing {
 
             from(components["java"])
             artifact(sourcesJar.get())
-            // artifact(javadocJar.get())
+            artifact(javadocJar.get())
         }
     }
     repositories {

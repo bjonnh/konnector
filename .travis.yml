@@ -6,8 +6,9 @@ services:
 language: generic
 
 env:
-  - BATECT_CACHE_TYPE=directory
-  - BATECT_ENABLE_TELEMETRY=false
+  global:
+    - BATECT_CACHE_TYPE=directory
+    - BATECT_ENABLE_TELEMETRY=false
 
 script: ./travis/build.sh
 
