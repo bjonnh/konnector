@@ -41,7 +41,7 @@ buildscript {
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.27" + if ((System.getProperty("snapshot") ?: false) == true) {
+version = "0.1.28" + if ((System.getProperty("snapshot") ?: false) == true) {
     "-SNAPSHOT"
 } else {
     ""
@@ -76,8 +76,6 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:$kotlinLoggingVersion") {
         exclude("org.slf4j")
     }
-
-    implementation("org.apache.logging.log4j:log4j-slf4j-impl:$slf4jVersion")
 
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
 
