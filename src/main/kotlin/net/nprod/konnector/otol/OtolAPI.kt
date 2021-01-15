@@ -19,4 +19,14 @@ interface OtolAPI : WebAPI {
      * location of the API endpoint
      */
     val apiURL: String
+
+    /**
+     * Maximum number of queries doable with a fuzzy name match
+     */
+    val otolMaximumQuerySizeFuzzyNameMatch: Int
+
+    /**
+     * Maximum number of queries doable with an exact name match
+     */
+    val otolMaximumQuerySizeExactNameMatch: Int
 }

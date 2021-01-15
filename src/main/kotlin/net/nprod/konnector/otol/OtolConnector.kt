@@ -10,6 +10,7 @@ package net.nprod.konnector.otol
 
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.time.ExperimentalTime
 
@@ -61,6 +62,49 @@ data class TaxInfoQuery(
     val include_terminal_descendants: Boolean
 )
 
+@Serializable
+@Suppress("ConstructorParameterNaming")
+data class MatchNamesQuery(
+    val names: List<String>,
+    val context_name: String? = null,
+    val do_approximate_matching: Boolean = false,
+    val include_suppressed: Boolean = false
+)
+
+@Serializable
+@Suppress("ConstructorParameterNaming")
+data class Matches(
+    val is_synonym: Boolean,
+    val score: Float,
+    val nomenclature_code: String,
+    val is_approximate_match: Boolean,
+    val taxon: ExtendedTaxonDescriptor,
+    val search_string: String,
+    val matched_name: String
+)
+
+@Serializable
+@Suppress("ConstructorParameterNaming")
+data class MatchedNameResult(
+    val name: String,
+    val matches: List<Matches>
+)
+
+@Serializable
+@Suppress("ConstructorParameterNaming")
+data class MatchedNames(
+    val governing_code: String,
+    val unambiguous_names: List<String>,
+    val unmatched_names: List<String>,
+    val matched_names: List<String>,
+    val context: String,
+    val includes_deprecated_taxa: Boolean,
+    val includes_suppressed_names: Boolean,
+    val includes_approximate_matches: Boolean,
+    val taxonomy: About,
+    val results: List<MatchedNameResult>
+)
+
 /**
  * Connects against OTOL
  *
@@ -78,6 +122,7 @@ class OtolConnector constructor(private val api: OtolAPI) {
     }
 
     val taxonomy = Taxonomy()
+    val tnrs = Tnrs()
 
     inner class Taxonomy {
         /**
@@ -128,6 +173,44 @@ class OtolConnector constructor(private val api: OtolAPI) {
             )
             return json.decodeFromString(
                 TaxonInfo.serializer(),
+                output
+            )
+        }
+    }
+
+    inner class Tnrs {
+        /**
+         * Match names
+         */
+        fun matchNames(
+            names: List<String>,
+            contextName: String? = null,
+            approximateMatching: Boolean = false,
+            includeSuppressed: Boolean = false
+        ): MatchedNames {
+            if (approximateMatching) {
+                require(names.size <= api.otolMaximumQuerySizeFuzzyNameMatch) {
+                    "Only 250 entries can be matched with approximate matching"
+                }
+            } else {
+                require(names.size <= api.otolMaximumQuerySizeExactNameMatch) {
+                    "Only 1000 entries can be matched with exact matching"
+                }
+            }
+            val output = api.call(
+                api.apiURL + "tnrs/match_names",
+                post = true,
+                body = json.encodeToString(
+                    MatchNamesQuery(
+                        names,
+                        contextName,
+                        approximateMatching,
+                        includeSuppressed
+                    )
+                )
+            )
+            return json.decodeFromString(
+                MatchedNames.serializer(),
                 output
             )
         }

@@ -41,7 +41,7 @@ buildscript {
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.30" + if ((System.getProperty("snapshot") ?: false) == true) {
+version = "0.1.31" + if ((System.getProperty("snapshot") ?: false) == true) {
     "-SNAPSHOT"
 } else {
     ""

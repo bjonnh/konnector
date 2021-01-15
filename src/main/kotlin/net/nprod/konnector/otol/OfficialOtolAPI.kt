@@ -33,6 +33,10 @@ const val OTOL_DEFAULT_INTERVAL: String = "1s"
 
 const val OTOL_DEFAULT_RETRY_DELAY: Long = 2_000
 
+const val OTOL_MAX_FUZZY_NAME_MATCH = 250
+
+const val OTOL_MAX_EXACT_NAME_MATCH = 1000
+
 /**
  * Connect to the official GBIF API.
  */
@@ -45,6 +49,9 @@ class OfficialOtolAPI : OtolAPI {
     override var delayTime: Long = OTOL_REQUEST_DELAY_TIME
     override var lastQueryTime: Long = System.currentTimeMillis()
     override var apiURL: String = "https://api.opentreeoflife.org/v3/"
+
+    override val otolMaximumQuerySizeFuzzyNameMatch: Int = OTOL_MAX_FUZZY_NAME_MATCH
+    override val otolMaximumQuerySizeExactNameMatch: Int = OTOL_MAX_EXACT_NAME_MATCH
 
     /**
      * Updates the necessary delay from the HTTP headers received

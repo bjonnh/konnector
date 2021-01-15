@@ -34,4 +34,18 @@ internal class OtolTest {
         val taxInfo = connector.taxonomy.taxonInfo(515698, includeLineage = true)
         assert(taxInfo.lineage?.any { it.name == "Pentapetalae" } ?: false)
     }
+
+    @Test
+    fun `match name exact`() {
+        val matchedName = connector.Tnrs().matchNames(listOf("Aster", "Symphyotrichum", "Barnadesia"))
+        assert(matchedName.results.size == 3)
+    }
+
+    @Test
+    fun `match name fuzzy`() {
+        val matchedName =
+            connector.Tnrs().matchNames(listOf("Asteyr", "Simphyotrichum", "Barnadosia"), approximateMatching = true)
+        println(matchedName)
+        assert(matchedName.results.size == 3)
+    }
 }
