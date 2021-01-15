@@ -41,7 +41,7 @@ buildscript {
 
 val publicationName = "maven"
 group = "net.nprod"
-version = "0.1.28" + if ((System.getProperty("snapshot") ?: false) == true) {
+version = "0.1.30" + if ((System.getProperty("snapshot") ?: false) == true) {
     "-SNAPSHOT"
 } else {
     ""
@@ -93,7 +93,7 @@ dependencies {
     }
 
     implementation("javax.annotation:javax.annotation-api:$javaxAnnotationVersion")
-
+    testImplementation("org.apache.logging.log4j:log4j-slf4j-impl:$slf4jVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitApiVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitApiVersion")
 }

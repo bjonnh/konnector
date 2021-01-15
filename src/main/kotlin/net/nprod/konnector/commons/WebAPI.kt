@@ -123,7 +123,7 @@ interface WebAPI {
             }
             call
         } catch (e: KnownError) {
-            if (retries > 0) return call(url, parameters, retries - 1)
+            if (retries > 0) return call(url, parameters, retries - 1, post, body)
             throw e
         }
     }
