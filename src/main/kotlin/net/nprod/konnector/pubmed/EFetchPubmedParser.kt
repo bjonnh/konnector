@@ -17,6 +17,7 @@ import net.nprod.konnector.commons.contentAsXML
 import net.nprod.konnector.commons.document
 import net.nprod.konnector.commons.element
 import net.nprod.konnector.commons.tagText
+import net.nprod.konnector.pubmed.models.Author
 import net.nprod.konnector.pubmed.models.PubmedArticle
 import org.codehaus.stax2.XMLInputFactory2
 import java.io.InputStream
@@ -64,7 +65,7 @@ class EFetchPubmedParser {
                                 if (it == "PMID") {
                                     if (pmid == null) pmid = allText("PMID")
                                 } else if (it == "Article") {
-                                    element("Journal", "Abstract", "ArticleTitle") {
+                                    element("Journal", "Abstract", "ArticleTitle", "AuthorList") {
                                         when (it) {
                                             "Journal" -> {
                                                 element("Title", "JournalIssue") {
@@ -84,6 +85,30 @@ class EFetchPubmedParser {
                                                 }
                                             }
                                             "Abstract" -> abstract = allText("Abstract")
+                                            "AuthorList" -> {
+                                                element("Author") {
+                                                    var lastName: String? = null
+                                                    var foreName: String? = null
+                                                    var initials: String? = null
+                                                    var affiliation: String? = null
+                                                    element("LastName", "ForeName", "Initials", "AffiliationInfo") {
+                                                        when (it) {
+                                                            "LastName" -> lastName = allText("LastName")
+                                                            "ForeName" -> foreName = allText("ForeName")
+                                                            "Initials" -> initials = allText("Initials")
+                                                            "AffiliationInfo" -> affiliation = allText("AffiliationInfo")
+                                                        }
+                                                    }
+                                                    authors.add(
+                                                        Author(
+                                                            lastName = lastName,
+                                                            foreName = foreName,
+                                                            initials = initials,
+                                                            affiliation = affiliation
+                                                        )
+                                                    )
+                                                }
+                                            }
                                             "ArticleTitle" -> articleTitle = allText("ArticleTitle")
                                             else -> {
                                             }
