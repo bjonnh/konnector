@@ -40,7 +40,7 @@ class EFetchPubmedParser {
     @Suppress("unused")
     fun parsePubmedArticlesIn(string: String): List<PubmedArticle?> = parsePubmedArticlesIn(string.byteInputStream())
 
-    @Suppress("ComplexMethod")
+    @Suppress("ComplexMethod", "LongMethod")
     fun parsePubmedArticlesIn(stream: InputStream): List<PubmedArticle?> {
 
         val reader = factory.createXMLStreamReader(stream)
@@ -96,7 +96,9 @@ class EFetchPubmedParser {
                                                             "LastName" -> lastName = allText("LastName")
                                                             "ForeName" -> foreName = allText("ForeName")
                                                             "Initials" -> initials = allText("Initials")
-                                                            "AffiliationInfo" -> affiliation = allText("AffiliationInfo")
+                                                            "AffiliationInfo" ->
+                                                                affiliation =
+                                                                    allText("AffiliationInfo")
                                                         }
                                                     }
                                                     authors.add(
