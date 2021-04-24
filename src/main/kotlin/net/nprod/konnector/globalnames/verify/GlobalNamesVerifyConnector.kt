@@ -48,7 +48,7 @@ data class Result(
     val dataSourceTitleShort: String?,
     val curation: String,
     val recordId: String,
-    val localId: String,
+    val localId: String? = null,
     val outlink: String? = null,
     val entryDate: String,
     val matchedName: String? = null,
