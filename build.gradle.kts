@@ -16,11 +16,11 @@ val localProperties = if (localPropertiesFile.exists()) {
 plugins {
     id("java")
     id("maven-publish")
+    id("signing")
     kotlin("jvm")
     kotlin("plugin.serialization")
     id("com.google.protobuf")
     id("com.github.ben-manes.versions")
-    id("com.jfrog.bintray")
     id("com.github.johnrengelman.shadow")
     id("org.jetbrains.dokka")
     id("fr.coppernic.versioning")
@@ -39,7 +39,7 @@ buildscript {
     }
 }
 
-val publicationName = "maven"
+val publicationName = "mavenPublish"
 group = "net.nprod"
 version = "0.1.33" + if ((System.getProperty("snapshot") ?: false) == true) {
     "-SNAPSHOT"
@@ -158,10 +158,6 @@ tasks {
     dokkaHtml.configure {
         outputDirectory.set(buildDir.resolve("dokka"))
     }
-
-    withType<com.jfrog.bintray.gradle.tasks.BintrayUploadTask> {
-        dependsOn("build")
-    }
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
@@ -176,7 +172,6 @@ val javadocJar by tasks.registering(Jar::class) {
 }
 
 publishing {
-
     publications {
         create<MavenPublication>(publicationName) {
             groupId = project.group.toString()
@@ -187,6 +182,39 @@ publishing {
             if (!version.contains("SNAPSHOT")) {
                 artifact(sourcesJar.get())
                 artifact(javadocJar.get())
+            }
+
+            pom {
+                name.set(project.name)
+                description.set("A connector for PubMed, CrossREF and GNFinder (gRPC only for now) for Kotlin.")
+                packaging = "jar"
+                url.set("https://github.com/bjonnh/konnector")
+                licenses {
+                    license {
+                        name.set("MIT")
+                        url.set("https://github.com/bjonnh/konnector/raw/main/LICENSE")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("bjonnh")
+                        name.set("Jonathan Bisson")
+                        email.set("bjonnh-konnector@bjonnh.net")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/bjonnh/konnector")
+                    url.set("https://github.com/bjonnh/konnector")
+                }
+            }
+            repositories {
+                maven {
+                    setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                    credentials {
+                        username = localProperties?.get("ossrhUsername") as String?
+                        password = localProperties?.get("ossrhPassword") as String?
+                    }
+                }
             }
         }
     }
@@ -201,6 +229,12 @@ publishing {
     }
 }
 
+signing {
+    useGpgCmd()
+    sign(publishing.publications[publicationName])
+}
+
+
 /**
  * Configuration of test framework
  */
@@ -213,7 +247,7 @@ tasks.test {
 }
 
 // For publishing
-
+/*
 bintray {
     user = System.getenv("BINTRAY_USER") ?: System.getProperty("bintray.user")
     key = System.getenv("BINTRAY_KEY") ?: System.getProperty("bintray.key")
@@ -229,6 +263,7 @@ bintray {
         }
     )
 }
+*/
 
 // Quality
 

@@ -6,3 +6,4 @@
 /cache/
 /.cache/
 local.properties
+secring.gpg
