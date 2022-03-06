@@ -22,11 +22,11 @@ plugins {
     id("com.google.protobuf")
     id("com.github.ben-manes.versions")
     id("com.github.johnrengelman.shadow")
-    id("org.jetbrains.dokka")
     id("fr.coppernic.versioning")
     id("io.gitlab.arturbosch.detekt")
     id("org.jlleitschuh.gradle.ktlint")
     id("org.jmailen.kotlinter")
+    id("org.jetbrains.dokka")
 }
 
 buildscript {
@@ -41,7 +41,7 @@ buildscript {
 
 val publicationName = "mavenPublish"
 group = "net.nprod"
-version = "0.1.34" + if ((System.getProperty("snapshot") ?: false) == true) {
+version = "0.1.35" + if ((System.getProperty("snapshot") ?: false) == true) {
     "-SNAPSHOT"
 } else {
     ""
@@ -52,7 +52,7 @@ repositories {
     jcenter()
     google()
     maven("https://kotlin.bintray.com/kotlinx")
-    maven("http://oss.jfrog.org/artifactory/oss-snapshot-local/")
+    maven("https://oss.jfrog.org/artifactory/oss-snapshot-local/")
 }
 
 dependencies {

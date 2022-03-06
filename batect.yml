@@ -2,7 +2,7 @@ project_name: konnector
 
 containers:
   build-env:
-    image: adoptopenjdk:11-jdk-hotspot
+    image: docker.io/eclipse-temurin:17-jre
     volumes:
       - local: .
         container: /code
