@@ -8,7 +8,6 @@
 
 package net.nprod.konnector.pubmed
 
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -28,7 +27,6 @@ import kotlin.time.ExperimentalTime
  */
 
 @ExperimentalTime
-@KtorExperimentalAPI
 @Suppress("LongParameterList")
 fun EntrezConnector.esearch(
     query: String,

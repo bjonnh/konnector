@@ -234,7 +234,6 @@ signing {
     sign(publishing.publications[publicationName])
 }
 
-
 /**
  * Configuration of test framework
  */
@@ -288,7 +287,7 @@ kotlinter {
 detekt {
     val detektVersion: String by project
     toolVersion = detektVersion
-    config = rootProject.files("qc/detekt.yml")
+    // config = rootProject.files("qc/detekt.yml")
     buildUponDefaultConfig = true
-    baseline = rootProject.file("qc/detekt-baseline.xml")
+    // baseline = rootProject.file("qc/detekt-baseline.xml")
 }

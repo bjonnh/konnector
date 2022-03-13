@@ -11,11 +11,10 @@ package net.nprod.konnector.crossref
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.statement.HttpResponse
-import io.ktor.util.KtorExperimentalAPI
 import mu.KotlinLogging
 import org.slf4j.Logger
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
 
 const val CROSSREF_DEFAULT_DELAY_BETWEEN_REQUEST: Long = 20
 const val CROSSREF_DEFAULT_RETRY_DELAY: Long = 2_000
@@ -24,7 +23,6 @@ const val CROSSREF_DEFAULT_RETRY_DELAY: Long = 2_000
  * Connects to the official CrossREF API
  */
 @ExperimentalTime
-@KtorExperimentalAPI
 class OfficialCrossRefAPI(
     private val networkKeepAliveTime: Long = 10000,
     private val networkConnectTimeout: Long = 20000,
@@ -51,13 +49,12 @@ class OfficialCrossRefAPI(
         val intervalInt = interval?.filter { it != 's' }?.toIntOrNull()
         val limitInt = limit?.toLongOrNull()
         if ((intervalInt != null) && (limitInt != null))
-            delayTime = (intervalInt / limitInt).seconds.toLongMilliseconds()
+            delayTime = (intervalInt / limitInt).seconds.inWholeMilliseconds
     }
 
     /**
      * We use a different approach in that module as the API can tell us to slow down (and they do)
      */
-    @ExperimentalTime
     override fun delayUpdate(call: HttpResponse) {
         updateDelayFromHeaderData(
             call.headers["X-Rate-Limit-Limit"],
@@ -66,7 +63,6 @@ class OfficialCrossRefAPI(
         updateLastQueryTime()
     }
 
-    @KtorExperimentalAPI
     override fun newClient(): HttpClient = HttpClient(CIO) {
         expectSuccess = false
         engine {

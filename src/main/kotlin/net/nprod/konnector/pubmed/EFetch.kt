@@ -8,7 +8,6 @@
 
 package net.nprod.konnector.pubmed
 
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.time.ExperimentalTime
@@ -44,7 +43,6 @@ data class EFetch(
  */
 
 @ExperimentalTime
-@KtorExperimentalAPI
 @Suppress("Duplicates", "LongParameterList")
 fun EntrezConnector.efetch(
     ids: List<Long>? = null,
@@ -86,7 +84,7 @@ fun EntrezConnector.efetch(
     runBlocking { delay(calcDelay()) }
     log.info("Calling URL: $eFetchapiURL")
     log.debug(" With parameters: $parameters")
-    val call = call(eFetchapiURL, parameters)
+    val call = callGet(eFetchapiURL, parameters)
 
     return EFetch(result = call)
 }
@@ -102,12 +100,11 @@ fun EntrezConnector.efetch(
  */
 
 @ExperimentalTime
-@KtorExperimentalAPI
 fun EntrezConnector.efetchNext(query: EFetch, retmax: Int? = null, retstart: Int? = null): EFetch {
     return efetch(
         null,
         retmax = retmax ?: query.retmax ?: ENTREZ_DEFAULT_MAXIMUM_RESULTS_NEXT,
-        retstart = retstart ?: (query.retstart ?: 0) + (query.retmax ?: ENTREZ_DEFAULT_MAXIMUM_RESULTS_NEXT),
+        retstart = retstart ?: ((query.retstart ?: 0) + (query.retmax ?: ENTREZ_DEFAULT_MAXIMUM_RESULTS_NEXT)),
         webenv = query.webenv,
         querykey = query.querykey
     )

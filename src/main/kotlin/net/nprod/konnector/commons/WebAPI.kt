@@ -10,15 +10,14 @@ package net.nprod.konnector.commons
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.request.request
+import io.ktor.client.request.post
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readText
 import io.ktor.content.TextContent
 import io.ktor.http.ContentType
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
@@ -31,7 +30,6 @@ const val DEFAULT_HTTP_CLIENT_CONNECT_ATTEMPTS = 5
  * Any kind of WebAPI based on a Ktor HTTP Client
  */
 @ExperimentalTime
-@KtorExperimentalAPI
 interface WebAPI {
     /**
      * A logger
@@ -92,23 +90,43 @@ interface WebAPI {
      * @throws UnManagedReturnCode when we have a HTTP return code we don't know about
      */
     @Suppress("ThrowsCount") // Yes we throw a lot, but for a good reason I guess
+    @Deprecated("Use callGet or callPost instead")
     fun call(
         url: String,
         parameters: Map<String, String>? = null,
         retries: Int = 3,
         post: Boolean = false,
-        body: String? = null
+        body: String = ""
     ): String {
         log.debug("Connecting to $url")
+        return if (post) {
+            log.error("Deprecated: Should call callPost(...)")
+            callGet(url, parameters, retries)
+        } else {
+            log.error("Deprecated: Should call callGet(...)")
+            callPost(url, parameters, retries, body)
+        }
+    }
 
+    /**
+     * call the API
+     *
+     * @param url The URL to query
+     * @param params a map of the HTTP request parameters that will be sent by GET (so don't make them too big)
+     * @param retries how many times the query is going to retry
+     * @throws NonExistent when we receive a 404 for a non existent entry
+     * @throws BadRequestError when we have an invalid request (400)
+     * @throws TooManyRequests when we had too many requests (429)
+     * @throws UnManagedReturnCode when we have a HTTP return code we don't know about
+     */
+    @Suppress("ThrowsCount") // Yes we throw a lot, but for a good reason I guess
+    private fun call(retries: Int = 3, responseGenerator: suspend () -> HttpResponse): String {
         return try {
             val call = runBlocking {
                 delay(calcDelay())
-                val response = httpClient.request<HttpResponse>(url) {
-                    method = if (post) HttpMethod.Post else HttpMethod.Get
-                    parameters?.forEach { (k, v) -> parameter(k, v) }
-                    if (post) body?.let { this.body = TextContent(body, contentType = ContentType.Application.Json) }
-                }
+
+                val response: HttpResponse = responseGenerator()
+
                 delayUpdate(response)
                 when (response.status.value) {
                     HttpStatusCode.OK.value -> response.readText()
@@ -123,8 +141,59 @@ interface WebAPI {
             }
             call
         } catch (e: KnownError) {
-            if (retries > 0) return call(url, parameters, retries - 1, post, body)
+            if (retries > 0) return call(retries - 1, responseGenerator)
             throw e
+        }
+    }
+
+    /**
+     * call the API with POST
+     *
+     * @param url The URL to query
+     * @param params a map of the HTTP request parameters that will be sent by GET (so don't make them too big)
+     * @param retries how many times the query is going to retry (default 0)
+     * @param body request body
+     * @throws NonExistent when we receive a 404 for a non existent entry
+     * @throws BadRequestError when we have an invalid request (400)
+     * @throws TooManyRequests when we had too many requests (429)
+     * @throws UnManagedReturnCode when we have a HTTP return code we don't know about
+     */
+    fun callPost(
+        url: String,
+        parameters: Map<String, String>? = null,
+        retries: Int = 0,
+        requestBody: String = ""
+    ): String {
+        log.debug("POST to $url, parameters: $parameters, body: $requestBody")
+        return call(retries) {
+            httpClient.post(url) {
+                parameters?.forEach { (k, v) -> parameter(k, v) }
+                body = TextContent(requestBody, contentType = ContentType.Application.Json)
+            }
+        }
+    }
+
+    /**
+     * call the API with GET
+     *
+     * @param url The URL to query
+     * @param params a map of the HTTP request parameters that will be sent by GET (so don't make them too big)
+     * @param retries how many times the query is going to retry (default 3)
+     * @throws NonExistent when we receive a 404 for a non existent entry
+     * @throws BadRequestError when we have an invalid request (400)
+     * @throws TooManyRequests when we had too many requests (429)
+     * @throws UnManagedReturnCode when we have a HTTP return code we don't know about
+     */
+    fun callGet(
+        url: String,
+        parameters: Map<String, String>? = null,
+        retries: Int = 3
+    ): String {
+        log.debug("GET to $url, parameters: $parameters")
+        return call(retries) {
+            httpClient.get(url) {
+                parameters?.forEach { (k, v) -> parameter(k, v) }
+            }
         }
     }
 

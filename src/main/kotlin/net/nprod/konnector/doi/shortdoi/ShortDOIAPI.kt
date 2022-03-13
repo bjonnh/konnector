@@ -8,12 +8,10 @@
 
 package net.nprod.konnector.doi.shortdoi
 
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.konnector.commons.WebAPI
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
-@KtorExperimentalAPI
 interface ShortDOIAPI : WebAPI {
     /**
      * location of the API endpoint

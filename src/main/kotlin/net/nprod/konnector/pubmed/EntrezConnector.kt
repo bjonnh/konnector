@@ -2,7 +2,7 @@
  *
  * SPDX-License-Identifier: MIT License
  *
- * Copyright (c) 2020 Jonathan Bisson
+ * Copyright (c) 2020-2022 Jonathan Bisson
  *
  */
 
@@ -10,14 +10,13 @@ package net.nprod.konnector.pubmed
 
 import io.ktor.client.HttpClient
 import io.ktor.client.statement.HttpResponse
-import io.ktor.util.KtorExperimentalAPI
 import mu.KotlinLogging
 import net.nprod.konnector.commons.BadRequestError
 import net.nprod.konnector.commons.WebAPI
 import net.nprod.konnector.pubmed.models.Esearch
 import org.slf4j.Logger
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
 
 /**
  * Default page size for esearchNext
@@ -52,13 +51,12 @@ const val ENTREZ_DEFAULT_RETRY_DELAY: Long = 2_000
  */
 
 @ExperimentalTime
-@KtorExperimentalAPI
 class EntrezConnector(private val apikey: String? = null, val delay: Long? = null) : WebAPI {
     override val log: Logger = KotlinLogging.logger(this::class.java.name)
     override var httpClient: HttpClient = newClient()
     override var retryDelay: Long = ENTREZ_DEFAULT_RETRY_DELAY
-    override var delayTime: Long = delay
-        ?: if (apikey == null) ENTREZ_DEFAULT_DELAY_TIME_NOT_LOGGED else ENTREZ_DEFAULT_DELAY_TIME_LOGGED_IN
+    override var delayTime: Long =
+        delay ?: if (apikey == null) ENTREZ_DEFAULT_DELAY_TIME_NOT_LOGGED else ENTREZ_DEFAULT_DELAY_TIME_LOGGED_IN
     override var lastQueryTime: Long = System.currentTimeMillis()
     internal var eSearchapiURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
     internal var eFetchapiURL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
@@ -74,22 +72,19 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
      * @param interval Is the period in the format <number>s (currently we have only seen 1s)
      *
      */
-    @ExperimentalTime
     private fun updateDelayFromHeaderData(limit: String? = "50", interval: String? = "1s") {
         val intervalInt = interval?.filter { it != 's' }?.toIntOrNull()
         val limitInt = limit?.toLongOrNull()
-        if ((intervalInt != null) && (limitInt != null))
-            delayTime = (intervalInt / limitInt).seconds.toLongMilliseconds()
+        if ((intervalInt != null) && (limitInt != null)) delayTime =
+            (intervalInt / limitInt).seconds.inWholeMilliseconds
     }
 
     /**
      * We use a different approach in that module as the API can tell us to slow down (and they do)
      */
-    @ExperimentalTime
     override fun delayUpdate(call: HttpResponse) {
         updateDelayFromHeaderData(
-            call.headers["X-RateLimit-Limit"],
-            "1s"
+            call.headers["X-RateLimit-Limit"], "1s"
         )
         updateLastQueryTime()
     }
@@ -111,15 +106,16 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
      */
 
     fun esearchNext(query: Esearch, retmax: Int? = null, retstart: Int? = null): Esearch {
-        if (query.query == "")
-            throw IllegalArgumentException("Cannot continue with an empty query")
+        if (query.query == "") throw IllegalArgumentException("Cannot continue with an empty query")
 
         return esearch(
             query.query!!,
             retmax ?: query.esearchresult.retmax ?: ENTREZ_DEFAULT_MAXIMUM_SEARCH_RESULTS_NEXT,
-            retstart ?: (query.esearchresult.retstart ?: 0) + (
-                query.esearchresult.retmax
-                    ?: ENTREZ_DEFAULT_MAXIMUM_SEARCH_RESULTS_NEXT
+            retstart ?: (
+                (query.esearchresult.retstart ?: 0) + (
+                    query.esearchresult.retmax
+                        ?: ENTREZ_DEFAULT_MAXIMUM_SEARCH_RESULTS_NEXT
+                    )
                 ),
             webenv = query.esearchresult.webenv,
             usehistory = query.esearchresult.webenv != null,
@@ -159,6 +155,7 @@ class EntrezConnector(private val apikey: String? = null, val delay: Long? = nul
 
                 block(fetchResult)
             } catch (e: BadRequestError) {
+                log.error(e.toString())
                 resultsLeft = false
             }
         }

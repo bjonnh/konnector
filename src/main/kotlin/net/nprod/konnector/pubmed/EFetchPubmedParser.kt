@@ -9,7 +9,6 @@
 package net.nprod.konnector.pubmed
 
 import com.ctc.wstx.stax.WstxInputFactory
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.konnector.commons.CachingXMLResolver
 import net.nprod.konnector.commons.allText
 import net.nprod.konnector.commons.attributes
@@ -26,7 +25,6 @@ import javax.xml.stream.XMLInputFactory
 /**
  * Parse a EFetch XML publication list and create simpler PubmedArticle objects.
  */
-@KtorExperimentalAPI
 class EFetchPubmedParser {
     private val factory: XMLInputFactory2
 

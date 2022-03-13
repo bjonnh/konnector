@@ -8,12 +8,10 @@
 
 package net.nprod.konnector.otol
 
-import io.ktor.util.KtorExperimentalAPI
 import net.nprod.konnector.commons.WebAPI
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
-@KtorExperimentalAPI
 interface OtolAPI : WebAPI {
     /**
      * location of the API endpoint

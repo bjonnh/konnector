@@ -146,6 +146,7 @@ fun <T> XMLStreamReader.element(vararg tagName: String, transform: (String) -> T
 class XMLStreamReaderIterator(val reader: XMLStreamReader) : Iterator<XMLStreamReader> {
     override fun hasNext(): Boolean = reader.hasNext()
 
+    @Suppress("SwallowedException")
     override fun next(): XMLStreamReader {
         try {
             reader.next()

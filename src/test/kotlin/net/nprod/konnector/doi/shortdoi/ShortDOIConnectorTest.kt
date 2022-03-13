@@ -8,11 +8,9 @@
 
 package net.nprod.konnector.doi.shortdoi
 
-import io.ktor.util.KtorExperimentalAPI
 import org.junit.jupiter.api.Test
 import kotlin.time.ExperimentalTime
 
-@KtorExperimentalAPI
 @ExperimentalTime
 internal class ShortDOIConnectorTest {
 

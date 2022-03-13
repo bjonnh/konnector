@@ -11,7 +11,6 @@ package net.nprod.konnector.commons
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import java.util.concurrent.ConcurrentHashMap
@@ -22,7 +21,6 @@ import javax.xml.stream.XMLResolver
  * It also loads the file locally if it exists
  */
 
-@KtorExperimentalAPI
 class CachingXMLResolver : XMLResolver {
     val client: HttpClient = HttpClient(CIO)
     val store: ConcurrentHashMap<String, String> = ConcurrentHashMap()
@@ -36,9 +34,9 @@ class CachingXMLResolver : XMLResolver {
             val fileName = systemID!!.takeLastWhile { it != '/' }
             val f = javaClass.getResource("/$fileName")
             val v = f?.readText() ?: runBlocking {
-                client.get<String>(systemID) // We checked it in the first line of this function
+                client.get(systemID)
             }
-            store[systemID] = v // We checked it in the first line of this function
+            store[systemID] = v.toString()
         } else {
             logger.debug("Using cache for $systemID")
         }

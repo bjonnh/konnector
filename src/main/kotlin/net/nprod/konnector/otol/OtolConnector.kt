@@ -8,7 +8,6 @@
 
 package net.nprod.konnector.otol
 
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -113,7 +112,6 @@ data class MatchedNames(
  * Following https://github.com/OpenTreeOfLife/germinator/wiki/Taxonomy-API-v3#subtree_taxonomy
  */
 @ExperimentalTime
-@KtorExperimentalAPI
 class OtolConnector constructor(private val api: OtolAPI) {
     private val json = Json {
         ignoreUnknownKeys = true

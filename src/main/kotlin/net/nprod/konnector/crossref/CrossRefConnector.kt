@@ -2,29 +2,26 @@
  *
  * SPDX-License-Identifier: MIT License
  *
- * Copyright (c) 2020 Jonathan Bisson
+ * Copyright (c) 2020-2022 Jonathan Bisson
  *
  */
 
 package net.nprod.konnector.crossref
 
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.nprod.konnector.commons.DecodingError
-import java.net.SocketTimeoutException
 import kotlin.time.ExperimentalTime
 
 /**
  * Connect to a real CrossREF compliant endpoint
  */
-@KtorExperimentalAPI
 @ExperimentalTime
 class CrossRefConnector constructor(private val api: CrossRefAPI) {
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun workFromDOIAsJson(doi: String): String = json.encodeToString<WorkResponse>(workFromDOI(doi))
+    fun workFromDOIAsJson(doi: String): String = json.encodeToString(workFromDOI(doi))
 
     fun workFromDOIAsJsonString(doi: String): String = workFromDOIAsJson(doi)
 
@@ -35,8 +32,8 @@ class CrossRefConnector constructor(private val api: CrossRefAPI) {
         worksAsJson(title, containerTitle, query)
 
     fun workFromDOI(doi: String): WorkResponse {
-        val output: String = api.call(api.apiURL + "/works/$doi")
-        return json.decodeFromString<WorkResponse>(output)
+        val output: String = api.callGet(api.apiURL + "/works/$doi")
+        return json.decodeFromString(output)
     }
 
     fun works(
@@ -46,6 +43,7 @@ class CrossRefConnector constructor(private val api: CrossRefAPI) {
     ): WorksResponse =
         worksIO(title, containerTitle, query)
 
+    @Suppress("SwallowedException")
     fun worksIO(
         title: String? = null,
         containerTitle: String? = null,
@@ -63,18 +61,15 @@ class CrossRefConnector constructor(private val api: CrossRefAPI) {
         if (containerTitle != null)
             parameters["query.container-title"] = containerTitle
 
-        val output = try {
-            api.call(
-                api.apiURL + "/works",
-                parameters
-            )
-        } catch (e: io.ktor.network.sockets.SocketTimeoutException) {
-            throw SocketTimeoutException()
-        }
+        val output = api.callGet(
+            api.apiURL + "/works",
+            parameters
+        )
 
         return try {
             json.decodeFromString(output)
         } catch (e: java.io.EOFException) {
+            api.log.error(e.toString())
             throw DecodingError("End of file received before the end of the JSON.")
         }
     }

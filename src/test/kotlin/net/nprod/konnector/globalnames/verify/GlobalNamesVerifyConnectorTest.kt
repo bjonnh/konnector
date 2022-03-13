@@ -8,15 +8,13 @@
 
 package net.nprod.konnector.globalnames.verify
 
-import io.ktor.util.KtorExperimentalAPI
 import org.junit.jupiter.api.Test
 import kotlin.time.ExperimentalTime
 
-@KtorExperimentalAPI
+const val MINIMAL_NUMBER_OF_SOURCES = 100
+
 @ExperimentalTime
 internal class GlobalNamesVerifyConnectorTest {
-    val MINIMAL_NUMBER_OF_SOURCES = 100
-
     private var connector = GlobalNamesVerifyConnector(OfficialGlobalNamesVerifyAPI())
 
     @Test
@@ -45,7 +43,7 @@ internal class GlobalNamesVerifyConnectorTest {
 
     @Test
     fun verifications() {
-        val source = connector.verifications(
+        val source: Verification = connector.verifications(
             VerificationQuery(
                 nameStrings = listOf(
                     "Pomatomus soltator",
@@ -55,10 +53,11 @@ internal class GlobalNamesVerifyConnectorTest {
                 withVernaculars = false
             )
         )
-        assert(source.size == 2)
+        assert(source.names.size==2)
         assert(
-            source.filter { it.input == "Pomatomus soltator" }
-                .first().bestResult?.currentName == "Pomatomus saltatrix (Linnaeus, 1766)"
+            source.names.first {
+                it.name == "Pomatomus soltator"
+            }.bestResult.currentName == "Pomatomus saltatrix (Linnaeus, 1766)"
         )
     }
 }

@@ -10,11 +10,10 @@ package net.nprod.konnector.doi.shortdoi
 
 import io.ktor.client.HttpClient
 import io.ktor.client.statement.HttpResponse
-import io.ktor.util.KtorExperimentalAPI
 import mu.KotlinLogging
 import org.slf4j.Logger
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
-import kotlin.time.seconds
 
 /**
  * Delay in ms between each request
@@ -37,7 +36,6 @@ const val SHORTDOI_DEFAULT_RETRY_DELAY: Long = 2_000
  * Connect to the official GBIF API.
  */
 @ExperimentalTime
-@KtorExperimentalAPI
 class OfficialShortDOIAPI : ShortDOIAPI {
     override val log: Logger = KotlinLogging.logger(this::class.java.name)
     override var httpClient: HttpClient = newClient()
@@ -61,13 +59,12 @@ class OfficialShortDOIAPI : ShortDOIAPI {
         val intervalInt = interval?.filter { it != 's' }?.toIntOrNull()
         val limitInt = limit?.toLongOrNull()
         if ((intervalInt != null) && (limitInt != null))
-            delayTime = (intervalInt / limitInt).seconds.toLongMilliseconds()
+            delayTime = (intervalInt / limitInt).seconds.inWholeMilliseconds
     }
 
     /**
      * We use a different approach in that module as the API can tell us to slow down (and they do)
      */
-    @ExperimentalTime
     override fun delayUpdate(call: HttpResponse) {
         updateDelayFromHeaderData(
             call.headers["X-Rate-Limit-Limit"],

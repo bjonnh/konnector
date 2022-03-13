@@ -8,7 +8,6 @@
 
 package net.nprod.konnector.globalnames.verify
 
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.encodeToString
@@ -43,41 +42,89 @@ data class VerificationQuery(
 )
 
 @Serializable
-data class Result(
-    val dataSourceId: Int,
-    val dataSourceTitleShort: String?,
+data class Kingdoms(
+    val name: String,
+    val namesNum: Int,
+    val percentage: Double
+)
+
+@Serializable
+@Suppress("ConstructorParameterNaming")
+data class VerificationMetadata(
+    val namesNum: Int? = null,
+    val withAllSources: Boolean? = null,
+    val withAllMatches: Boolean? = null,
+    val withContext: Boolean? = null,
+    val withCapitalization: Boolean? = null,
+    val dataSources: List<Int>? = null,
+    val contextThreshold: Double? = null,
+    val contextNamesNum: Int? = null,
+    val context: String? = null,
+    val contextPercentage: Double? = null,
+    val kingdom: String? = null,
+    val kingdomPercentage: Double? = null,
+    val Kingdoms: List<Kingdoms>? = null
+)
+
+
+@Serializable
+data class ScoreDetails(
+    val infraSpecificRankScore: Double,
+    val fuzzyLessScore: Double,
+    val curatedDataScore: Double,
+    val authorMatchScore: Double,
+    val acceptedNameScore: Double,
+    val parsingQualityScore: Double
+)
+
+@Serializable
+data class ResultData(
+    val dataSourceId: Int?,
+    val dataSourceTitleShort: String,
     val curation: String,
     val recordId: String,
+    val globalId: String? = null,
     val localId: String? = null,
     val outlink: String? = null,
     val entryDate: String,
-    val matchedName: String? = null,
-    val matchedCardinality: String? = null,
+    val sortScore: Double,
+    val matchedName: String,
+    val matchedCardinality: Int,
     val matchedCanonicalSimple: String? = null,
     val matchedCanonicalFull: String? = null,
-    val currentRecordId: String? = null,
-    val currentName: String? = null,
-    val currentCardinality: String? = null,
+    val currentRecordId: String,
+    val currentName: String,
+    val currentCardinality: Int? = null,
     val currentCanonicalSimple: String? = null,
     val currentCanonicalFull: String? = null,
-    val isSynonym: Boolean? = null,
+    val isSynonym: Boolean,
     val classificationPath: String? = null,
     val classificationRanks: String? = null,
-    val editDistance: Int? = null,
-    val stemEditDistance: Int? = null,
-    val matchType: String? = null
+    val editDistance: Int,
+    val editDistanceStem: Int? = null,
+    val matchType: String? = null,
+    val scoreDetails: ScoreDetails
+)
+
+@Serializable
+data class VerificationName(
+    val id: String,
+    val name: String,
+    val matchType: String,
+    val bestResult: ResultData,
+    val results: List<ResultData>? = null,
+    val dataSourcesNum: Int,
+    val curation: String,
+    val overloadDetected: String? = null,
+    val error: String? = null
 )
 
 @Serializable
 data class Verification(
-    val inputId: String,
-    val input: String,
-    val matchType: String,
-    val bestResult: Result? = null,
-    val preferredResults: List<Result>? = null,
-    val dataSourcesNum: Int,
-    val curation: String
+    val metadata: VerificationMetadata,
+    val names: List<VerificationName>
 )
+
 
 /**
  * Connects against GlobalNames verify
@@ -88,7 +135,6 @@ data class Verification(
  * https://app.swaggerhub.com/apis-docs/dimus/gnames/1.0.0#/Verification
  */
 @ExperimentalTime
-@KtorExperimentalAPI
 class GlobalNamesVerifyConnector constructor(private val api: GlobalNamesVerifyAPI) {
     private val json = Json {
         ignoreUnknownKeys = true
@@ -101,7 +147,7 @@ class GlobalNamesVerifyConnector constructor(private val api: GlobalNamesVerifyA
      * @return true if received pong
      */
     fun ping(): Boolean {
-        val output = api.call(
+        val output = api.callGet(
             api.apiURL + "ping"
         )
         return output == "pong"
@@ -111,7 +157,7 @@ class GlobalNamesVerifyConnector constructor(private val api: GlobalNamesVerifyA
      * Get the version of the endpoint
      */
     fun version(): Version {
-        val output = api.call(
+        val output = api.callGet(
             api.apiURL + "version"
         )
         return json.decodeFromString(
@@ -125,7 +171,7 @@ class GlobalNamesVerifyConnector constructor(private val api: GlobalNamesVerifyA
      */
 
     fun dataSources(): List<DataSource> {
-        val output = api.call(
+        val output = api.callGet(
             api.apiURL + "data_sources"
         )
         return json.decodeFromString(
@@ -140,7 +186,7 @@ class GlobalNamesVerifyConnector constructor(private val api: GlobalNamesVerifyA
 
     fun dataSource(id: Int): DataSource {
         if (id <= 0) throw IllegalArgumentException("ID of data source must be greater than 0")
-        val output = api.call(
+        val output = api.callGet(
             api.apiURL + "data_sources/$id"
         )
         return json.decodeFromString(
@@ -152,14 +198,13 @@ class GlobalNamesVerifyConnector constructor(private val api: GlobalNamesVerifyA
     /**
      * Get the info about one or many organisms
      */
-    fun verifications(query: VerificationQuery): List<Verification> {
-        val output = api.call(
+    fun verifications(query: VerificationQuery): Verification {
+        val output = api.callPost(
             api.apiURL + "verifications",
-            post = true,
-            body = json.encodeToString(query)
+            requestBody = json.encodeToString(query)
         )
         return json.decodeFromString(
-            ListSerializer(Verification.serializer()),
+            Verification.serializer(),
             output
         )
     }

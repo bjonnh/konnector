@@ -1,12 +1,10 @@
 package net.nprod.konnector.gbif
 
-import io.ktor.util.KtorExperimentalAPI
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.time.ExperimentalTime
 
 @ExperimentalTime
-@KtorExperimentalAPI
 internal class GBIFConnectorTest {
     private var connector = GBIFConnector(OfficialGBIFAPI())
 
